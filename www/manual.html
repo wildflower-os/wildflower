@@ -1,0 +1,410 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>MOROS Manual</title>
+    <link rel="stylesheet" type="text/css" href="moros.css">
+  </head>
+  <body>
+    <h1>MOROS Manual</h1>
+
+    <h2>Boot</h2>
+
+    <p>During boot MOROS will display its version followed by the memory layout,
+memory size, processor, devices, network cards, disks, and the real time clock.</p>
+
+    <pre><code>[0.250962] SYS MOROS v0.11.0
+[0.254961] MEM [0x00000000000000-0x00000000000FFF] FrameZero
+[0.255961] MEM [0x00000000001000-0x00000000004FFF] PageTable
+[0.256961] MEM [0x00000000005000-0x00000000014FFF] Bootloader
+[0.256961] MEM [0x00000000015000-0x00000000015FFF] BootInfo
+[0.257961] MEM [0x00000000016000-0x0000000009EFFF] Kernel
+[0.258961] MEM [0x0000000009F000-0x0000000009FFFF] Reserved
+[0.259960] MEM [0x000000000A0000-0x000000000EFFFF] Unmapped
+[0.260960] MEM [0x000000000F0000-0x000000000FFFFF] Reserved
+[0.261960] MEM [0x00000000100000-0x0000000010BFFF] Kernel
+[0.261960] MEM [0x0000000010C000-0x0000000030BFFF] KernelStack
+[0.262960] MEM [0x0000000030C000-0x000000003FFFFF] Usable
+[0.262960] MEM [0x00000000400000-0x000000005FDFFF] Kernel
+[0.263960] MEM [0x000000005FE000-0x0000000060EFFF] PageTable
+[0.264960] MEM [0x0000000060F000-0x00000001FDFFFF] Usable
+[0.264960] MEM [0x00000001FE0000-0x00000001FFFFFF] Reserved
+[0.265960] MEM [0x00000002000000-0x000000FFFBFFFF] Unmapped
+[0.265960] MEM [0x000000FFFC0000-0x000000FFFFFFFF] Reserved
+[0.266959] RAM 32 MB
+[0.363945] CPU GenuineIntel
+[0.363945] CPU Intel(R) Core(TM)2 Duo CPU     T7700  @ 2.40GHz
+[0.368944] CPU BP:0 running
+[0.369944] CPU AP:1 waiting
+[0.398939] RNG RDRAND unavailable
+[0.413937] PCI 0000:00:00 [8086:1237]
+[0.414937] PCI 0000:01:00 [8086:7000]
+[0.414937] PCI 0000:01:01 [8086:7010]
+[0.414937] PCI 0000:01:03 [8086:7113]
+[0.415937] PCI 0000:02:00 [1234:1111]
+[0.415937] PCI 0000:03:00 [8086:100E]
+[0.422936] NET DRV E1000
+[0.424935] NET MAC 52-54-00-12-34-56
+[0.431934] ATA 0:0 QEMU HARDDISK QM00001 (32 MB)
+[0.436933] RTC 2024-11-02 18:18:38 +0000
+</code></pre>
+
+    <h2>Installation</h2>
+
+    <p>The first time MOROS will boot in diskless mode where you can use the builtin
+commands to test the system or <code>install</code> to setup the
+    <a href="filesystem.html">filesystem</a> on a disk:</p>
+
+    <pre><code>Warning: MFS not found, run &#39;install&#39; to setup the system
+
+/
+&gt; install
+Welcome to MOROS v0.11.0 installation program!
+
+Proceed? [y/N] y
+
+Listing disks ...
+Path            Name (Size)
+/dev/ata/0/0    QEMU HARDDISK QM00001 (32 MB)
+/dev/mem        RAM DISK
+
+Formatting disk ...
+Enter path of disk to format: /dev/ata/0/0
+Disk successfully formatted
+MFS is now mounted to &#39;/&#39;
+
+Populating filesystem...
+Creating &#39;/bin&#39;
+Creating &#39;/dev&#39;
+Creating &#39;/ini&#39;
+Creating &#39;/lib&#39;
+Creating &#39;/net&#39;
+Creating &#39;/src&#39;
+Creating &#39;/tmp&#39;
+Creating &#39;/usr&#39;
+Creating &#39;/var&#39;
+Fetching &#39;/bin/clear&#39;
+Fetching &#39;/bin/get&#39;
+Fetching &#39;/bin/halt&#39;
+Fetching &#39;/bin/ntp&#39;
+Fetching &#39;/bin/pkg&#39;
+Fetching &#39;/bin/print&#39;
+Fetching &#39;/bin/reboot&#39;
+Fetching &#39;/bin/sleep&#39;
+Creating &#39;/dev/ata&#39;
+Creating &#39;/dev/ata/0&#39;
+Creating &#39;/dev/ata/1&#39;
+Creating &#39;/dev/clk&#39;
+Creating &#39;/dev/net&#39;
+Creating &#39;/dev/vga&#39;
+Creating &#39;/dev/ata/0/0&#39;
+Creating &#39;/dev/ata/0/1&#39;
+Creating &#39;/dev/ata/1/0&#39;
+Creating &#39;/dev/ata/1/1&#39;
+Creating &#39;/dev/clk/boot&#39;
+Creating &#39;/dev/clk/epoch&#39;
+Creating &#39;/dev/clk/rtc&#39;
+Creating &#39;/dev/console&#39;
+Creating &#39;/dev/net/tcp&#39;
+Creating &#39;/dev/net/udp&#39;
+Creating &#39;/dev/net/gw&#39;
+Creating &#39;/dev/net/ip&#39;
+Creating &#39;/dev/net/mac&#39;
+Creating &#39;/dev/net/usage&#39;
+Creating &#39;/dev/null&#39;
+Creating &#39;/dev/random&#39;
+Creating &#39;/dev/speaker&#39;
+Creating &#39;/dev/vga/buffer&#39;
+Creating &#39;/dev/vga/font&#39;
+Creating &#39;/dev/vga/mode&#39;
+Creating &#39;/dev/vga/palette&#39;
+Fetching &#39;/ini/banner.txt&#39;
+Fetching &#39;/ini/boot.sh&#39;
+Fetching &#39;/ini/lisp.lsp&#39;
+Fetching &#39;/ini/shell.sh&#39;
+Fetching &#39;/ini/version.txt&#39;
+Creating &#39;/ini/palettes&#39;
+Fetching &#39;/ini/palettes/default.sh&#39;
+Fetching &#39;/ini/palettes/gruvbox-dark.sh&#39;
+Fetching &#39;/ini/palettes/gruvbox-light.sh&#39;
+Creating &#39;/ini/fonts&#39;
+Fetching &#39;/ini/fonts/zap-light-8x16.psf&#39;
+Creating &#39;/lib/lisp&#39;
+Fetching &#39;/lib/lisp/alias.lsp&#39;
+Fetching &#39;/lib/lisp/core.lsp&#39;
+Fetching &#39;/lib/lisp/file.lsp&#39;
+Fetching &#39;/lib/lisp/math.lsp&#39;
+Fetching &#39;/tmp/alice.txt&#39;
+Fetching &#39;/tmp/machines.txt&#39;
+Creating &#39;/var/log&#39;
+Creating &#39;/var/www&#39;
+Fetching &#39;/var/www/index.html&#39;
+Fetching &#39;/var/www/moros.css&#39;
+Fetching &#39;/var/www/moros.png&#39;
+Creating &#39;/var/pkg&#39;
+
+Creating user...
+Username: vinc
+Password:
+Confirm:
+
+Installation successful!
+
+Quit the console or reboot to apply changes
+</code></pre>
+
+    <p>You can then use <code>^D</code> (a key combination of <code>CTRL</code> and <code>D</code>) to quit the
+diskless mode and let MOROS run the bootscript <code>/ini/boot.sh</code> to login and use
+the shell.</p>
+
+    <p>If no disks were detected or if you prefer not to use any you can mount the
+system in memory and use a virtual disk with <code>memory format</code> before <code>install</code>
+or using <code>/dev/mem</code> for the disk during the setup.</p>
+
+    <h2>Shell</h2>
+
+    <p>The <a href="shell.html">shell</a> is the primary command line interface to use MOROS.
+This is were you can type a command and its arguments to tell the system what
+to do:</p>
+
+    <pre><code>~
+&gt; print &quot;Hello, World!&quot;
+Hello, World!
+</code></pre>
+
+    <p>The system has a <code>help</code> command to help you remember the basic commands.</p>
+
+    <p>Most commands also have a special <code>--help</code> argument to show all their options.</p>
+
+    <h2>Directories</h2>
+
+    <p>The line above the command prompt tells you where you are in the disk. The
+tilde <code>~</code> means that you are in your home directory:</p>
+
+    <pre><code>~
+&gt; print $DIR
+/usr/vinc
+</code></pre>
+
+    <p>You can change directory by typing it as if it was a command:</p>
+
+    <pre><code>~
+&gt; /tmp
+
+/tmp
+&gt; print $DIR
+/tmp
+</code></pre>
+
+    <p>From now on we&#39;ll omit the directory line in most examples.</p>
+
+    <p>You can list the content of a directory with <code>list</code>:</p>
+
+    <pre><code>&gt; list /tmp
+5090 2023-04-17 06:25:54 alice.txt
+  82 2023-04-17 06:25:55 beep
+ 324 2023-04-17 06:25:55 life
+ 168 2023-04-17 06:25:55 lisp
+ 649 2023-04-17 06:25:54 machines.txt
+</code></pre>
+
+    <p>The command has some options to sort the results:</p>
+
+    <pre><code>&gt; list --help
+Usage: list &lt;options&gt; [&lt;dir&gt;]
+
+Options:
+  -b, --binary-size   Use binary size
+  -a, --all           Show dot files
+  -n, --name          Sort by name
+  -s, --size          Sort by size
+  -t, --time          Sort by time
+</code></pre>
+
+    <p>You can write a directory in the disk with <code>write</code>:</p>
+
+    <pre><code>&gt; write test/
+
+&gt; list
+5090 2023-04-17 06:25:54 alice.txt
+  82 2023-04-17 06:25:55 beep
+ 324 2023-04-17 06:25:55 life
+ 168 2023-04-17 06:25:55 lisp
+ 649 2023-04-17 06:25:54 machines.txt
+   0 2023-04-17 07:06:18 test
+</code></pre>
+
+    <p>The slash <code>/</code> at the end of <code>test/</code> is there to tell the <code>write</code> command to
+create a directory instead of a file.</p>
+
+    <h2>Files</h2>
+
+    <p>You can create a file by redirecting the output of a command with an arrow <code>=&gt;</code>
+to the file:</p>
+
+    <pre><code>&gt; print &quot;Hello, World!&quot; =&gt; hello.txt
+</code></pre>
+
+    <p>The command <code>read</code> will read the content of the file:</p>
+
+    <pre><code>&gt; read hello.txt
+Hello, World!
+</code></pre>
+
+    <p>You can edit a file with the <code>edit</code> command that will run the text editor.</p>
+
+    <p>Use <code>^W</code> (a key combination of <code>CTRL</code> and <code>W</code>) inside the editor to write the
+content to the file and <code>^Q</code> to quit the editor and go back to the shell.</p>
+
+    <p>The <code>help</code> command has a subcommand <code>help edit</code> to list the editor commands:</p>
+
+    <pre><code>&gt; help edit
+MOROS text editor is a very simple editor inspired by Pico.
+
+Commands:
+  ^Q    Quit editor
+  ^W    Write to file
+  ^X    Write to file and quit
+  ^T    Go to top of file
+  ^B    Go to bottom of file
+  ^A    Go to beginning of line
+  ^E    Go to end of line
+  ^D    Cut line
+  ^Y    Copy line
+  ^P    Paste line
+</code></pre>
+
+    <h2>Time</h2>
+
+    <p>You can print the date with <code>date</code>:</p>
+
+    <pre><code>&gt; date
+2001-01-01 00:00:00 +0000
+</code></pre>
+
+    <p>You can update the real time clock by writing the correct time to its device
+file:</p>
+
+    <pre><code>&gt; print 2023-03-21 10:00:00 =&gt; /dev/clk/rtc
+
+&gt; date
+2023-03-21 10:00:00 +0000
+</code></pre>
+
+    <p>You can also set the <code>TZ</code> environment variable to use your preferred timezone:</p>
+
+    <pre><code>&gt; calc &quot;2 * 60 * 60&quot;
+7200
+
+&gt; env TZ 7200
+
+&gt; date
+2023-03-21 12:00:00 +0200
+</code></pre>
+
+    <p>Add <code>env TZ 7200</code> to <code>/ini/boot.sh</code> before <code>shell</code> to save the timezone:</p>
+
+    <pre><code>&gt; read /ini/boot.sh
+shell /ini/palettes/gruvbox-dark.sh
+read /ini/fonts/zap-light-8x16.psf =&gt; /dev/vga/font
+read /ini/banner.txt
+user login
+env TZ 7200
+shell
+</code></pre>
+
+    <p>There&#39;s a device file to get the number of seconds elapsed since Unix Epoch:</p>
+
+    <pre><code>&gt; read /dev/clk/epoch
+1682105344.624905
+</code></pre>
+
+    <p>And another one since boot:</p>
+
+    <pre><code>&gt; read /dev/clk/boot
+1169.384929
+</code></pre>
+
+    <h2>Aliases</h2>
+
+    <p>You can add custom commands to the shell with the <code>alias</code> command.</p>
+
+    <p>For example you can define an <code>uptime</code> command that will read the device file
+described above:</p>
+
+    <pre><code>&gt; alias uptime &quot;read /dev/clk/boot&quot;
+
+&gt; uptime
+1406.304852
+</code></pre>
+
+    <p>You can add that command to <code>/ini/shell.sh</code> to save it.</p>
+
+    <p>Some shortcuts have been defined in that file for the most frequent commands,
+for example you can use <code>e</code> instead of <code>edit</code> to edit a file.</p>
+
+    <pre><code>&gt; read /ini/shell.sh
+# Command shortcuts
+alias c    copy
+alias d    delete
+alias e    edit
+alias f    find
+alias h    help
+alias l    list
+alias m    move
+alias p    print
+alias q    quit
+alias r    read
+alias w    write
+
+alias sh   shell
+alias dsk  disk
+alias mem  memory
+alias kbd  keyboard
+</code></pre>
+
+    <h2>Network</h2>
+
+    <p>You can setup the <a href="network.html">network</a> manually with some network
+    <a href="devices.html">device files</a> or automatically with the <code>dhcp</code> command:</p>
+
+    <pre><code>&gt; dhcp
+[8.801660] NET IP 10.0.2.15/24
+[8.804659] NET GW 10.0.2.2
+[8.808659] NET DNS 10.0.2.3
+</code></pre>
+
+    <p>A few tools are available like the generalist <code>socket</code> command that be used to
+send and receive TCP packets:</p>
+
+    <pre><code>&gt; socket 10.0.2.2:1234
+Hello, World!
+</code></pre>
+
+    <p>Or the more specialized <code>http</code> command to request a document from a web server:</p>
+
+    <pre><code>&gt; http moros.cc /test.html
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot;&gt;
+    &lt;title&gt;MOROS&lt;/title&gt;
+    &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;/moros.css&quot;&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;MOROS&lt;/h1&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+    <p>There is also a <code>ntp</code> script to synchronize the clock over the network:</p>
+
+    <pre><code>&gt; ntp
+2023-03-21 10:00:00
+
+&gt; ntp =&gt; /dev/clk/rtc
+[12.111156] RTC 2023-03-21 10:00:00 +0000
+</code></pre>
+  <footer><p><a href="/">MOROS</a></footer>
+  </body>
+</html>

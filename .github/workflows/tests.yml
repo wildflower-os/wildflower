@@ -1,0 +1,21 @@
+name: Tests
+on: [push]
+env:
+  CARGO_TERM_COLOR: always
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    - run: sudo apt-get -qqy update
+    - run: sudo apt-get -qqy install qemu-system-x86
+    - run: make
+    - run: make user-rust
+    - run: make test

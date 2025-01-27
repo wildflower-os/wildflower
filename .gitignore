@@ -1,0 +1,6 @@
+# [ RUST ] #
+target/
+Cargo.lock
+
+# [ IMAGES ] #
+disk.img

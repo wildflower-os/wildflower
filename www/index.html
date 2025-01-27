@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>MOROS: Obscure Rust Operating System</title>
+    <link rel="stylesheet" type="text/css" href="moros.css">
+  </head>
+  <body>
+    <h1>MOROS: Obscure Rust Operating System</h1>
+
+    <p><img src="images/moros.png" alt="moros screenshot"></p>
+
+    <p>MOROS is a hobby operating system written in Rust by
+    <a href="https://vinc.cc">Vincent Ollivier</a>.</p>
+
+    <p>It targets <a href="hardware.html#computers">computers</a> with an x86-64 architecture and a
+BIOS, typically from 2005 to 2020. It also runs well on most
+    <a href="hardware.html#emulators">emulators</a>.</p>
+
+    <h2>Usage</h2>
+
+    <p>MOROS is open source. You can <a href="https://github.com/vinc/moros">build</a> or
+    <a href="https://github.com/vinc/moros/releases">download</a> an image. Check out
+the <a href="manual.html">manual</a> for details on how to use it.</p>
+
+    <h2>Features</h2>
+
+    <p>MOROS is text-based and draws inspiration from Unix and DOS to provide a simple
+and efficient environment for computing and communication from the command
+line. Each program is designed to ensure a cohesive user interface across the
+entire system.</p>
+
+    <p>The <a href="shell.html">shell</a> is the hearth of MOROS, used to navigate the
+    <a href="filesystem.html">filesystem</a> and run other programs:</p>
+
+    <p><img src="images/shell.png" alt="shell screenshot"></p>
+
+    <p>A <a href="lisp.html">lisp</a> interpreter serves as the primary programming environment to
+extend the userspace:</p>
+
+    <p><img src="images/lisp.png" alt="lisp screenshot"></p>
+
+    <p>A basic <a href="editor.html">text editor</a> is included for editing text files and
+scripts, and a derived text viewer offers a distraction-free experience for
+reading long texts:</p>
+
+    <p><img src="images/viewer.png" alt="viewer screenshot"></p>
+
+    <p>Other utilities include a <a href="calculator.html">calculator</a> and the <code>find</code> command,
+which uses a simple <a href="regex.html">regex engine</a> to search files or lines in the
+filesystem:</p>
+
+    <p><img src="images/find.png" alt="find command screenshot"></p>
+
+    <p>MOROS features a <a href="network.html">network stack</a> with drivers for Intel PRO/1000,
+RTL8139, and PCNET cards, enabling internet access:</p>
+
+    <p><img src="images/network.png" alt="screenshot"></p>
+
+    <p>It also includes some <a href="games.html">games</a>:</p>
+
+    <p><img src="images/chess.png" alt="chess screenshot"></p>
+
+    <p>And it&#39;s quite <a href="colors.html">customizable</a>:</p>
+
+    <p><img src="images/light.png" alt="light mode screenshot"></p>
+
+    <h2>Demo (currently disabled)</h2>
+
+    <p>Log in to a demo using the name of the system as the password for the guest
+account:</p>
+
+    <pre><code>$ ssh guest@try.moros.cc
+</code></pre>
+
+    <p>Happy hacking!</p>
+  <footer><p><a href="/">MOROS</a></footer>
+  </body>
+</html>
