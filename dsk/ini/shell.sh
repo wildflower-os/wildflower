@@ -28,3 +28,5 @@ alias exit quit
 alias ls   list
 alias mv   move
 alias rm   delete
+alias nano edit
+alias cat  read

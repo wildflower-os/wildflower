@@ -29,13 +29,13 @@ fn help_unknown(cmd: &str) -> Result<(), ExitCode> {
     Err(ExitCode::Failure)
 }
 
-fn print_usage(alias: &str, command: &str, usage: &str) {
+fn print_usage(command: &str, usage: &str) {
     let csi_col1 = Style::color("lime");
     let csi_col2 = Style::color("aqua");
     let csi_reset = Style::reset();
     println!(
-        "  {}{}{}{:21}{}{}",
-        csi_col1, alias, csi_col2, command, csi_reset, usage
+        "  {}{}{:21}{}{}",
+        csi_col1, csi_col2, command, csi_reset, usage
     );
 }
 
@@ -44,30 +44,47 @@ fn help_summary() -> Result<(), ExitCode> {
     let csi_reset = Style::reset();
 
     println!("{}Usage:{}", csi_color, csi_reset);
-    print_usage("", "<dir>", " Change directory");
-    print_usage("", "<cmd>", " Execute command");
+    print_usage("<dir>", " Change directory");
+    print_usage("<cmd>", " Execute command");
     println!();
 
     println!("{}Commands:{}", csi_color, csi_reset);
+
     print_usage(
-        "c",
-        "opy <file> <file>",
+        "copy <file> <file>",
         "Copy file from source to destination",
     );
-    print_usage("d", "elete <file>", "Delete file or empty directory");
-    print_usage("e", "dit <file>", "Edit existing or new file");
-    print_usage("f", "ind <str> <path>", "Find pattern in path");
-    print_usage("h", "elp <cmd>", "Display help about a command");
-    print_usage("l", "ist <dir>", "List entries in directory");
+    print_usage("   - cp <file>", "Alias for copy");
+
+    print_usage("delete <file>", "Delete file or empty directory");
+    print_usage("   - rm <file>", "Alias for delete");
+
+    print_usage("edit <file>", "Edit existing or new file");
+    print_usage("   - nano <file>", "Alias for edit");
+
+    print_usage("find <str> <path>", "Find pattern in path");
+
+    print_usage("help <cmd>", "Display help about a command");
+
+    print_usage("list <dir>", "List entries in directory");
+    print_usage("   - ls <dir>", "Alias for list");
+
     print_usage(
-        "m",
-        "ove <file> <file>",
+        "move <file> <file>",
         "Move file from source to destination",
     );
-    print_usage("p", "rint <str>", "Print string to screen");
-    print_usage("q", "uit", "Quit the console");
-    print_usage("r", "ead <file>", "Read file to screen");
-    print_usage("w", "rite <file>", "Write file or directory");
+    print_usage("   - mv <file>", "Alias for move");
+
+    print_usage("print <str>", "Print string to screen");
+    print_usage("   - echo <str>", "Alias for print");
+
+    print_usage("quit", "Quit the console");
+
+    print_usage( "read <file>", "Read file to screen");
+    print_usage("   - cat <file>", "Alias for read");
+
+    print_usage( "write <file>", "Write file or directory");
+
     println!();
 
     println!("{}Credits:{}", csi_color, csi_reset);
