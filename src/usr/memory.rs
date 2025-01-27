@@ -30,10 +30,10 @@ pub fn main(args: &[&str]) -> Result<(), ExitCode> {
 }
 
 fn parse_usize(s: &str) -> Result<usize, ParseIntError> {
-    if s.starts_with("0x") {
-        usize::from_str_radix(&s[2..], 16)
+    if let Some(s) = s.strip_prefix("0x") {
+        usize::from_str_radix(s, 16)
     } else {
-        usize::from_str_radix(s, 10)
+        s.parse()
     }
 }
 

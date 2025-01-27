@@ -1,6 +1,9 @@
+use core::convert::TryFrom;
+
 use super::cmos::CMOS;
 
-use crate::api::clock::{DATE_TIME, DATE_TIME_LEN};
+use crate::api::clock::DATE_TIME_LEN;
+use crate::api::time::{format_primitive_time, parse_primitive_date_time};
 use crate::api::fs::{FileIO, IO};
 
 use alloc::string::String;
@@ -55,11 +58,10 @@ impl RTC {
 impl FileIO for RTC {
     fn read(&mut self, buf: &mut [u8]) -> Result<usize, ()> {
         self.sync();
-        let date = Date::try_from_ymd(self.year.into(), self.month, self.day).map_err(|_| ())?;
-        let date_time = date
-            .try_with_hms(self.hour, self.minute, self.second)
-            .map_err(|_| ())?;
-        let out = date_time.format(DATE_TIME);
+        let month = time::Month::try_from(self.month).map_err(|_| ())?;
+        let date = Date::from_calendar_date(self.year.into(), month, self.day).map_err(|_| ())?;
+        let date_time = PrimitiveDateTime::new(date, time::Time::from_hms(self.hour, self.minute, self.second).map_err(|_| ())?);
+        let out = format_primitive_time(date_time);
         buf.copy_from_slice(out.as_bytes());
         Ok(out.len())
     }
@@ -70,13 +72,16 @@ impl FileIO for RTC {
         if s.len() != RTC::size() {
             return Err(());
         }
-        let date_time = PrimitiveDateTime::parse(s, DATE_TIME).map_err(|_| ())?;
-        self.year = date_time.year() as u16;
-        self.month = date_time.month();
-        self.day = date_time.day();
-        self.hour = date_time.hour();
-        self.minute = date_time.minute();
-        self.second = date_time.second();
+        let date_time = parse_primitive_date_time(s);
+        if date_time.len() != RTC::size() {
+            return Err(());
+        }
+        self.year = u16::from(date_time[0]) * 100 + u16::from(date_time[1]);
+        self.month = date_time[2];
+        self.day = date_time[3];
+        self.hour = date_time[4];
+        self.minute = date_time[5];
+        self.second = date_time[6];
         if self.year < RTC_CENTURY || self.year > RTC_CENTURY + 99 {
             return Err(());
         }

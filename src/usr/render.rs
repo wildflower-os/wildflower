@@ -167,7 +167,7 @@ fn render_bmp(path: &str, config: &mut Config) -> Result<Command, ExitCode> {
                 // Load palette
                 let mut palette = [0; 256 * 3];
                 for (i, (r, g, b)) in bmp.palette.iter().enumerate() {
-                    palette[i * 3 + 0] = *r;
+                    palette[i * 3] = *r;
                     palette[i * 3 + 1] = *g;
                     palette[i * 3 + 2] = *b;
                 }

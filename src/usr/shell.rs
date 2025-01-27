@@ -220,11 +220,7 @@ pub fn split_args(cmd: &str) -> Vec<String> {
             }
             i = j + 1;
         }
-        if c == '\\' && !is_escaped {
-            is_escaped = true;
-        } else {
-            is_escaped = false;
-        }
+        is_escaped = c == '\\' && !is_escaped;
     }
 
     if i < n {

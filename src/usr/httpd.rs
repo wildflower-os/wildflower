@@ -1,5 +1,4 @@
 use crate::api::clock;
-use crate::api::clock::DATE_TIME_ZONE;
 use crate::api::console::Style;
 use crate::api::fs;
 use crate::api::process::ExitCode;
@@ -98,7 +97,7 @@ impl Response {
         let mut headers = BTreeMap::new();
         headers.insert(
             "Date".to_string(),
-            time::now_utc().format("%a, %d %b %Y %H:%M:%S GMT"),
+            time::format_offset_time(time::now()).to_string(),
         );
         headers.insert(
             "Server".to_string(),
@@ -108,7 +107,7 @@ impl Response {
             req,
             buf: Vec::new(),
             mime: String::new(),
-            time: time::now().format(DATE_TIME_ZONE),
+            time: time::format_offset_time(time::now()).to_string(),
             code: 0,
             size: 0,
             body: Vec::new(),

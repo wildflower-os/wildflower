@@ -2,11 +2,10 @@ use crate::api;
 use crate::api::clock::DATE_TIME_ZONE;
 use crate::api::console::Style;
 use crate::api::process::ExitCode;
-use time::validate_format_string;
 
 pub fn main(args: &[&str]) -> Result<(), ExitCode> {
     if args.len() > 2 {
-        return Err(ExitCode::UsageError);
+        return help();
     }
     let format = if args.len() > 1 {
         args[1]
@@ -16,16 +15,8 @@ pub fn main(args: &[&str]) -> Result<(), ExitCode> {
     if format == "-h" || format == "--help" {
         return help();
     }
-    match validate_format_string(format) {
-        Ok(()) => {
-            println!("{}", api::time::now().format(format));
-            Ok(())
-        }
-        Err(e) => {
-            error!("{}", e);
-            Err(ExitCode::Failure)
-        }
-    }
+    println!("{}", api::time::format_offset_time(api::time::now()));
+    Ok(())
 }
 
 fn help() -> Result<(), ExitCode> {

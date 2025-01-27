@@ -7,8 +7,8 @@ use alloc::string::{String, ToString};
 
 pub fn main(args: &[&str]) -> Result<(), ExitCode> {
     let n = args.len();
-    for i in 1..n {
-        match args[i] {
+    for i in args.iter().take(n).skip(1) {
+        match *i {
             "-h" | "--help" => {
                 help();
                 return Ok(());

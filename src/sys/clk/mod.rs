@@ -11,7 +11,7 @@ pub use rtc::RTC;
 pub use sync::{halt, sleep, wait};
 pub use timer::{pit_frequency, set_pit_frequency, ticks};
 
-use crate::api;
+use crate::api::time::format_offset_time;
 
 use alloc::string::String;
 use time::{Duration, OffsetDateTime};
@@ -24,6 +24,6 @@ pub fn init() {
 pub fn date() -> String {
     let s = epoch::epoch_time();
     let ns = Duration::nanoseconds(libm::floor(1e9 * (s - libm::floor(s))) as i64);
-    let dt = OffsetDateTime::from_unix_timestamp(s as i64) + ns;
-    dt.format(api::clock::DATE_TIME_ZONE)
+    let dt = OffsetDateTime::from_unix_timestamp(s as i64).unwrap() + ns;
+    format_offset_time(dt)
 }

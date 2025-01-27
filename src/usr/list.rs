@@ -1,4 +1,3 @@
-use crate::api::clock::DATE_TIME;
 use crate::api::console::Style;
 use crate::api::fs;
 use crate::api::fs::FileInfo;
@@ -84,7 +83,7 @@ fn print_file(file: &FileInfo, width: usize, unit: SizeUnit) {
     let csi_reset = Style::reset();
 
     let size = unit.format(file.size() as usize);
-    let time = time::from_timestamp(file.time() as i64).format(DATE_TIME);
+    let time = time::format_offset_time(time::from_timestamp(file.time() as i64));
     let color = if file.is_dir() {
         csi_dir_color
     } else if file.is_device() {

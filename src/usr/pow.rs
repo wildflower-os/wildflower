@@ -122,8 +122,8 @@ impl fmt::Display for Game {
         let color = Style::color("yellow");
         write!(f, "\n  {}SCORE: {:>22}{}\n\n", color, self.score, reset)?;
         for y in 0..4 {
-            write!(f, "  +------+------+------+------+\n")?;
-            write!(f, "  |      |      |      |      |\n")?;
+            writeln!(f, "  +------+------+------+------+")?;
+            writeln!(f, "  |      |      |      |      |")?;
             write!(f, "  |")?;
             for x in 0..4 {
                 let v = self.board[x + y * 4];
@@ -147,9 +147,9 @@ impl fmt::Display for Game {
                     write!(f, " {}{:^5}{}|", color, v, reset)?;
                 }
             }
-            write!(f, "\n  |      |      |      |      |\n")?;
+            writeln!(f, "\n  |      |      |      |      |")?;
         }
-        write!(f, "  +------+------+------+------+\n")
+        writeln!(f, "  +------+------+------+------+")
     }
 }
 
