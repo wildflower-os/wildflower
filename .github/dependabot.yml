@@ -1,6 +1,10 @@
 version: 2
 updates:
-- package-ecosystem: cargo
-  directory: "/"
-  schedule:
-    interval: daily
+  - package-ecosystem: cargo
+    directory: "/"
+    schedule:
+      interval: daily
+    ignore:
+      - dependency-name: "vte"
+      - dependency-name: "bootloader"
+      - dependency-name: "time"

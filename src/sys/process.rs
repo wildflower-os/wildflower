@@ -48,7 +48,7 @@ pub static MAX_PID: AtomicUsize = AtomicUsize::new(1);
 
 lazy_static! {
     pub static ref PROCESS_TABLE: RwLock<[Box<Process>; MAX_PROCS]> =
-        { RwLock::new([(); MAX_PROCS].map(|_| Box::new(Process::new()))) };
+        RwLock::new([(); MAX_PROCS].map(|_| Box::new(Process::new())));
 }
 
 // Called during kernel heap initialization

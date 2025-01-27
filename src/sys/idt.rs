@@ -30,7 +30,7 @@ fn interrupt_index(irq: u8) -> u8 {
 fn default_handler() {}
 
 lazy_static! {
-    static ref IRQ_HANDLERS: Mutex<[fn(); 16]> = { Mutex::new([default_handler; 16]) };
+    static ref IRQ_HANDLERS: Mutex<[fn(); 16]> = Mutex::new([default_handler; 16]);
     static ref IDT: InterruptDescriptorTable = {
         let mut idt = InterruptDescriptorTable::new();
         idt.breakpoint.set_handler_fn(breakpoint_handler);
