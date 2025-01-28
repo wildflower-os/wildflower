@@ -10,8 +10,7 @@ to 2020, but it also runs well on most emulators (Bochs, QEMU, and VirtualBox).
 ## Running
 ```sh
 cargo install bootimage # If you haven't already
-make image output=video keyboard=qwerty
-make qemu output=video nic=rtl8139
+make all
 install # Do this once the emulator is running
 # Choose /dev/ata/0/0 as the disk
 ```

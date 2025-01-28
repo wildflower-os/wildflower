@@ -6,3 +6,4 @@ All notable changes to Wildflower after the MOROS fork will be documented in thi
 - Dependency Updates
 - Wildflower Branding
 - HFS (Hidden File System)
+- Easier Makefile commands

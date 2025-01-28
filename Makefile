@@ -125,3 +125,13 @@ pkg:
 clean:
 	cargo clean
 	rm -f www/*.html www/images/*.png
+
+build:
+	make image output=video keyboard=qwerty
+
+wfos:
+	make qemu output=video nic=rtl8139
+
+all:
+	make build
+	make wfos
