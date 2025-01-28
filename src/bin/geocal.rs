@@ -3,6 +3,7 @@
 
 extern crate alloc;
 
+use alloc::borrow::ToOwned;
 use alloc::format;
 use alloc::string::String;
 use alloc::vec::Vec;
@@ -48,11 +49,11 @@ fn main(args: &[&str]) {
     let last_day;
     if solar_calendar {
         week = 10;
-        format = String::from("%h:%y:%s:%d:%c:%b");
+        format = String::from("%h:%y:%s:%d:%c:%b".to_owned());
         last_day = last_day_of_solar_month(timestamp, longitude);
     } else {
         week = 8;
-        format = String::from("%h:%y:%m:%d:%c:%b");
+        format = String::from("%h:%y:%m:%d:%c:%b".to_owned());
         last_day = last_day_of_lunisolar_month(timestamp, longitude);
     };
     let formatted_date = get_formatted_date(&format, timestamp, longitude);
@@ -156,7 +157,7 @@ fn main(args: &[&str]) {
 fn last_day_of_lunisolar_month(timestamp: i64, longitude: f64) -> usize {
     // HACK: This rely on an undefined behavior when getting a timestamp for
     // day following the last day of the month.
-    let format = String::from("%h:%y:%m:%d:%c:%b");
+    let format = String::from("%h:%y:%m:%d:%c:%b".to_owned());
     let a = get_formatted_date("%h:%y:%m:29:50:00", timestamp, longitude);
     let t = get_timestamp(format.clone(), a.clone(), longitude);
     let b = get_formatted_date(&format, t, longitude);
@@ -171,7 +172,7 @@ fn last_day_of_lunisolar_month(timestamp: i64, longitude: f64) -> usize {
 fn last_day_of_solar_month(timestamp: i64, longitude: f64) -> usize {
     // HACK: This rely on an undefined behavior when getting a timestamp for
     // day following the last day of the month.
-    let format = String::from("%h:%y:%s:%d:%c:%b");
+    let format = String::from("%h:%y:%s:%d:%c:%b".to_owned());
     for i in 88..100 {
         let d = format!("{:02}", i);
         let f = ["%h:%y:%s:", &d, ":50:00"].join("");

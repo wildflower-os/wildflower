@@ -3,6 +3,7 @@
 
 extern crate alloc;
 
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 use wildflower::api::io;
@@ -21,7 +22,7 @@ fn main(_args: &[&str]) {
             syscall::exit(process::ExitCode::Success);
         } else {
             let args: Vec<&str> = cmd.split(' ').collect();
-            let mut path = String::from("/bin/");
+            let mut path = String::from("/bin/".to_owned());
             path.push_str(args[0]);
             let _ = process::spawn(&path, &args);
         }
