@@ -32,9 +32,6 @@ pub fn init(boot_info: &'static BootInfo) {
     sys::keyboard::init();
     sys::clk::init();
 
-    let v = option_env!("WILDFLOWER_VERSION").unwrap_or(env!("CARGO_PKG_VERSION"));
-    log!("SYS Wildflower v{}", v);
-
     sys::mem::init(boot_info);
     sys::cpu::init();
     sys::acpi::init(); // Require MEM
@@ -44,7 +41,8 @@ pub fn init(boot_info: &'static BootInfo) {
     sys::ata::init();
     sys::fs::init(); // Require ATA
 
-    log!("RTC {}", sys::clk::date());
+    // Clear the screen
+    print!("{}", api::console::CLEAR);
 }
 
 #[allow(dead_code)]
