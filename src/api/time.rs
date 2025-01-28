@@ -1,7 +1,10 @@
 use crate::api::clock;
 use crate::sys;
 
-use alloc::{string::{String, ToString}, vec::Vec};
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
 use time::{Duration, OffsetDateTime, UtcOffset};
 
 pub fn now() -> OffsetDateTime {

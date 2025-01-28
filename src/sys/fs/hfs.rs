@@ -1,5 +1,8 @@
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
 use spin::Mutex;
-use alloc::{string::{String, ToString}, vec::Vec};
 
 pub struct HiddenFile {
     filename: String,
@@ -35,7 +38,10 @@ impl HiddenFS {
 
     pub fn retrieve_file(&self, filename: &str) -> Option<Vec<u8>> {
         let files = self.files.lock();
-        files.iter().find(|f| f.filename == filename).map(|f| f.data.clone())
+        files
+            .iter()
+            .find(|f| f.filename == filename)
+            .map(|f| f.data.clone())
     }
 
     pub fn delete_file(&self, filename: &str) -> bool {
@@ -85,7 +91,12 @@ impl HiddenFS {
         if data.len() < 4 {
             return; // Not enough data
         }
-        let file_count = u32::from_le_bytes([data[cursor], data[cursor + 1], data[cursor + 2], data[cursor + 3]]) as usize;
+        let file_count = u32::from_le_bytes([
+            data[cursor],
+            data[cursor + 1],
+            data[cursor + 2],
+            data[cursor + 3],
+        ]) as usize;
         cursor += 4;
 
         let mut files = self.files.lock();
@@ -151,7 +162,10 @@ mod tests {
     fn test_store_retrieve() {
         let fs = HiddenFS::new();
         fs.store_file("test.txt", b"Hello, world!");
-        assert_eq!(fs.retrieve_file("test.txt"), Some(b"Hello, world!".to_vec()));
+        assert_eq!(
+            fs.retrieve_file("test.txt"),
+            Some(b"Hello, world!".to_vec())
+        );
     }
 
     #[test_case]

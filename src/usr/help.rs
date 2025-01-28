@@ -50,10 +50,7 @@ fn help_summary() -> Result<(), ExitCode> {
 
     println!("{}Commands:{}", csi_color, csi_reset);
 
-    print_usage(
-        "copy <file> <file>",
-        "Copy file from source to destination",
-    );
+    print_usage("copy <file> <file>", "Copy file from source to destination");
     print_usage("   - cp <file>", "Alias for copy");
 
     print_usage("delete <file>", "Delete file or empty directory");
@@ -69,10 +66,7 @@ fn help_summary() -> Result<(), ExitCode> {
     print_usage("list <dir>", "List entries in directory");
     print_usage("   - ls <dir>", "Alias for list");
 
-    print_usage(
-        "move <file> <file>",
-        "Move file from source to destination",
-    );
+    print_usage("move <file> <file>", "Move file from source to destination");
     print_usage("   - mv <file>", "Alias for move");
 
     print_usage("print <str>", "Print string to screen");
@@ -80,10 +74,10 @@ fn help_summary() -> Result<(), ExitCode> {
 
     print_usage("quit", "Quit the console");
 
-    print_usage( "read <file>", "Read file to screen");
+    print_usage("read <file>", "Read file to screen");
     print_usage("   - cat <file>", "Alias for read");
 
-    print_usage( "write <file>", "Write file or directory");
+    print_usage("write <file>", "Write file or directory");
 
     println!();
 

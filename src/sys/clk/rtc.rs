@@ -3,8 +3,8 @@ use core::convert::TryFrom;
 use super::cmos::CMOS;
 
 use crate::api::clock::DATE_TIME_LEN;
-use crate::api::time::{format_primitive_time, parse_primitive_date_time};
 use crate::api::fs::{FileIO, IO};
+use crate::api::time::{format_primitive_time, parse_primitive_date_time};
 
 use alloc::string::String;
 use time::{Date, PrimitiveDateTime};
@@ -60,7 +60,10 @@ impl FileIO for RTC {
         self.sync();
         let month = time::Month::try_from(self.month).map_err(|_| ())?;
         let date = Date::from_calendar_date(self.year.into(), month, self.day).map_err(|_| ())?;
-        let date_time = PrimitiveDateTime::new(date, time::Time::from_hms(self.hour, self.minute, self.second).map_err(|_| ())?);
+        let date_time = PrimitiveDateTime::new(
+            date,
+            time::Time::from_hms(self.hour, self.minute, self.second).map_err(|_| ())?,
+        );
         let out = format_primitive_time(date_time);
         buf.copy_from_slice(out.as_bytes());
         Ok(out.len())
