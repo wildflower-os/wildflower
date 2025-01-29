@@ -5,8 +5,6 @@ use core::fmt;
 
 pub use crate::sys::console::{EOT_KEY, ETX_KEY};
 
-pub const CLEAR: &str = "\x1b[2J"; // Clear the screen
-
 #[derive(Clone, Copy)]
 pub struct Style {
     foreground: Option<usize>,

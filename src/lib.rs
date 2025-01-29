@@ -40,9 +40,6 @@ pub fn init(boot_info: &'static BootInfo) {
     sys::net::init(); // Require PCI
     sys::ata::init();
     sys::fs::init(); // Require ATA
-
-    // Clear the screen
-    print!("{}", api::console::CLEAR);
 }
 
 #[allow(dead_code)]
