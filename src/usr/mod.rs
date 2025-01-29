@@ -30,6 +30,7 @@ pub mod r#move;
 pub mod net;
 pub mod pci;
 pub mod pi;
+pub mod play;
 pub mod pow;
 pub mod read;
 pub mod render;

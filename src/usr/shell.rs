@@ -13,11 +13,10 @@ use alloc::string::{String, ToString};
 use alloc::vec::Vec;
 use core::sync::atomic::{fence, Ordering};
 
-// TODO: Scan /bin
-const AUTOCOMPLETE_COMMANDS: [&str; 40] = [
-    "2048", "calc", "chess", "copy", "date", "decode", "delete", "dhcp", "diff", "disk", "edit",
+const AUTOCOMPLETE_COMMANDS: [&str; 38] = [
+    "play", "calc", "copy", "date", "decode", "delete", "dhcp", "diff", "disk", "edit",
     "elf", "encode", "env", "goto", "hash", "help", "hex", "host", "http", "httpd", "install",
-    "keyboard", "life", "lisp", "list", "memory", "move", "net", "pci", "quit", "read", "render",
+    "keyboard", "lisp", "list", "memory", "move", "net", "pci", "quit", "read", "render",
     "shell", "socket", "tcp", "time", "user", "view", "write",
 ];
 
@@ -511,11 +510,9 @@ fn exec_with_config(cmd: &str, config: &mut Config) -> Result<(), ExitCode> {
 fn dispatch(args: &[&str], config: &mut Config) -> Result<(), ExitCode> {
     match args[0] {
         "" => Ok(()),
-        "2048" => usr::pow::main(args),
         "alias" => cmd_alias(args, config),
         //"beep"     => usr::beep::main(args),
         "calc" => usr::calc::main(args),
-        "chess" => usr::chess::main(args),
         "copy" => usr::copy::main(args),
         "date" => usr::date::main(args),
         "decode" => usr::decode::main(args),
@@ -538,7 +535,6 @@ fn dispatch(args: &[&str], config: &mut Config) -> Result<(), ExitCode> {
         "httpd" => usr::httpd::main(args),
         "install" => usr::install::main(args),
         "keyboard" => usr::keyboard::main(args),
-        "life" => usr::life::main(args),
         "lisp" => usr::lisp::main(args),
         "list" => usr::list::main(args),
         "logs" => cmd_logs(),
@@ -547,6 +543,7 @@ fn dispatch(args: &[&str], config: &mut Config) -> Result<(), ExitCode> {
         "net" => usr::net::main(args),
         "pci" => usr::pci::main(args),
         "pi" => usr::pi::main(args),
+        "play" => usr::play::main(args),
         "quit" => Err(ExitCode::ShellExit),
         "read" | "cat" => usr::read::main(args),
         "render" => usr::render::main(args),
