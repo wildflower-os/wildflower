@@ -1,6 +1,7 @@
 use crate::api::fs::{FileIO, IO};
 use crate::sys;
 
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 use bit_field::BitField;
@@ -356,9 +357,9 @@ impl Drive {
         let count = self.block_count() as usize;
         let bytes = size * count;
         if bytes >> 20 < 1000 {
-            (bytes >> 20, String::from("MB"))
+            (bytes >> 20, String::from("MB".to_owned()))
         } else {
-            (bytes >> 30, String::from("GB"))
+            (bytes >> 30, String::from("GB".to_owned()))
         }
     }
 }
