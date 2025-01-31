@@ -12,6 +12,10 @@ impl Speaker {
     pub fn new() -> Self {
         Self {}
     }
+
+    pub fn size() -> usize {
+        8
+    }
 }
 
 impl FileIO for Speaker {

@@ -148,19 +148,23 @@ extern "x86-interrupt" fn page_fault_handler(
             }
         }
     } else if error_code.contains(PageFaultErrorCode::USER_MODE) {
-        // TODO: This should be removed when the process page table is no
-        // longer a simple clone of the kernel page table. Currently a process
-        // is executed from its kernel address that is shared with the process.
+        // Properly handle user space page faults by allocating and mapping the required page
         let start = (addr / 4096) * 4096;
-        if sys::mem::alloc_pages(&mut mapper, start, 4096).is_ok() {
-            if sys::process::is_userspace(start) {
-                let code_addr = sys::process::code_addr();
-                let src = (code_addr + start) as *mut u8;
-                let dst = start as *mut u8;
-                unsafe {
-                    core::ptr::copy_nonoverlapping(src, dst, 4096);
-                }
-            }
+        if sys::mem::alloc_pages(&mut mapper, start, 1).is_ok() {
+        // Initialize the newly allocated page if necessary
+        // For example, set it to zero or copy necessary data
+        } else {
+        printk!(
+            "{}Error:{} Could not allocate page at {:#X}\n",
+            csi_color,
+            csi_reset,
+            addr
+        );
+        if error_code.contains(PageFaultErrorCode::USER_MODE) {
+            api::syscall::exit(ExitCode::PageFaultError);
+        } else {
+            hlt_loop();
+        }
         }
     } else {
         printk!(

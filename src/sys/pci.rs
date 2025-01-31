@@ -104,8 +104,9 @@ impl DeviceConfig {
                 l + (h << 32)
             }
             _ => {
-                // TODO
-                panic!("Unknown base address size");
+                // Handle unknown base address size
+                log!("Unsupported base address size: {}", bar0.get_bits(1..3));
+                0
             }
         };
         PhysAddr::new(addr)

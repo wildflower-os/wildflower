@@ -25,7 +25,7 @@ impl Block {
         match BitmapBlock::next_free_addr() {
             None => None,
             Some(addr) => {
-                BitmapBlock::alloc(addr);
+                let _ = BitmapBlock::alloc(addr);
 
                 // Initialize block
                 let mut block = Block::read(addr);

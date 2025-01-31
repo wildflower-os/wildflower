@@ -65,13 +65,17 @@ impl MemBlockDevice {
 
 impl BlockDeviceIO for MemBlockDevice {
     fn read(&mut self, block_index: u32, buf: &mut [u8]) -> Result<(), ()> {
-        // TODO: check for overflow
+        if block_index as usize >= self.dev.len() {
+            return Err(());
+        }
         buf[..].clone_from_slice(&self.dev[block_index as usize][..]);
         Ok(())
     }
 
     fn write(&mut self, block_index: u32, buf: &[u8]) -> Result<(), ()> {
-        // TODO: check for overflow
+        if block_index as usize >= self.dev.len() {
+            return Err(());
+        }
         self.dev[block_index as usize][..].clone_from_slice(buf);
         Ok(())
     }
@@ -97,7 +101,7 @@ pub fn format_mem() {
     if let Some(sb) = SuperBlock::new() {
         sb.write();
         let root = Dir::root();
-        BitmapBlock::alloc(root.addr());
+        let _ = BitmapBlock::alloc(root.addr());
     }
 }
 
@@ -190,7 +194,7 @@ pub fn format_ata() {
         // Allocate root dir
         debug_assert!(is_mounted());
         let root = Dir::root();
-        BitmapBlock::alloc(root.addr());
+        let _ = BitmapBlock::alloc(root.addr());
     }
 }
 

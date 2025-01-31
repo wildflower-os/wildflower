@@ -1,7 +1,7 @@
-mod buffer;
+pub(crate) mod buffer;
 mod color;
 mod font;
-mod palette;
+pub(crate) mod palette;
 mod screen;
 mod writer;
 

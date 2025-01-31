@@ -3,6 +3,7 @@ use super::dir::Dir;
 use super::file::File;
 use super::{dirname, filename, realpath, FileIO, IO};
 
+use crate::sys;
 use crate::sys::ata::Drive;
 use crate::sys::clk::{BootTime, EpochTime, RTC};
 use crate::sys::console::Console;
@@ -191,7 +192,29 @@ impl Device {
         None
     }
 
-    // TODO: Add size()
+    pub fn size(&self) -> usize {
+        match self {
+            Device::Null => 0,
+            Device::File(io) => io.size(),
+            Device::Console(_) => Console::size(),
+            Device::Random(_) => Random::size(),
+            Device::BootTime(_) => BootTime::size(),
+            Device::EpochTime(_) => EpochTime::size(),
+            Device::RTC(_) => RTC::size(),
+            Device::TcpSocket(_) => TcpSocket::size(),
+            Device::UdpSocket(_) => UdpSocket::size(),
+            Device::VgaBuffer(_) => sys::vga::buffer::Buffer::size(),
+            Device::VgaFont(_) => VgaFont::size(),
+            Device::VgaMode(_) => VgaMode::size(),
+            Device::VgaPalette(_) => sys::vga::palette::Palette::size(),
+            Device::Speaker(_) => Speaker::size(),
+            Device::Drive(_) => Drive::size(),
+            Device::NetGw(_) => NetGw::size(),
+            Device::NetIp(_) => NetIp::size(),
+            Device::NetMac(_) => NetMac::size(),
+            Device::NetUsage(_) => NetUsage::size(),
+        }
+    }
 }
 
 impl FileIO for Device {

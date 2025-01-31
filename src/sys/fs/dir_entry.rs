@@ -1,6 +1,7 @@
 use super::dir::Dir;
 use super::{dirname, filename, realpath, FileType};
 
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::convert::TryInto;
@@ -29,7 +30,7 @@ impl DirEntry {
     }
 
     pub fn new(dir: Dir, kind: FileType, addr: u32, size: u32, time: u64, name: &str) -> Self {
-        let name = String::from(name);
+        let name = String::from(name.to_owned());
         Self {
             dir,
             kind,
@@ -145,7 +146,6 @@ impl FileInfo {
         self.kind
     }
 
-    // TODO: Duplicated from dir entry
     pub fn is_dir(&self) -> bool {
         self.kind == FileType::Dir
     }

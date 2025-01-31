@@ -18,7 +18,7 @@ impl BitmapBlock {
         (sb.bitmap_area() + (i / n / 8), (i % (n * 8)) as usize)
     }
 
-    pub fn alloc(addr: u32) {
+    pub fn alloc(addr: u32) -> Result<(), &'static str> {
         let (a, i) = Self::indexes(addr);
         let mut block = Block::read(a);
         let bitmap = block.data_mut();
@@ -26,8 +26,9 @@ impl BitmapBlock {
             bitmap[i / 8].set_bit(i % 8, true);
             block.write();
             super_block::inc_alloc_count();
+            Ok(())
         } else {
-            // TODO: alloc failed
+            Err("Allocation failed: block already allocated")
         }
     }
 

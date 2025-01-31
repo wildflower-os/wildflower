@@ -16,6 +16,10 @@ impl VgaFont {
     pub fn new() -> Self {
         Self
     }
+
+    pub fn size() -> usize {
+        256
+    }
 }
 
 impl FileIO for VgaFont {

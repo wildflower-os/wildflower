@@ -34,12 +34,8 @@ const ELF_MAGIC: [u8; 4] = [0x7F, b'E', b'L', b'F'];
 const BIN_MAGIC: [u8; 4] = [0x7F, b'B', b'I', b'N'];
 
 const MAX_HANDLES: usize = 64;
-const MAX_PROCS: usize = 4; // TODO: Increase this
-const MAX_PROC_SIZE: usize = 10 << 20; // 10 MB
-
-// TODO: Remove this when the kernel is no longer at 0x200000 in userspace.
-// Currently this address must be used by the linker for user programs that
-// need to allocate memory to avoid using kernel memory.
+const MAX_PROCS: usize = 4;
+const MAX_PROC_SIZE: usize = 10 << 20;
 static USER_ADDR: u64 = 0x800000;
 
 static CODE_ADDR: AtomicU64 = AtomicU64::new(0);
@@ -238,7 +234,6 @@ pub fn set_stack_frame(stack_frame: InterruptStackFrameValue) {
     proc.stack_frame = Some(stack_frame);
 }
 
-// TODO: Remove this when the kernel is no longer at 0x200000 in userspace
 pub fn is_userspace(addr: u64) -> bool {
     USER_ADDR <= addr && addr <= USER_ADDR + MAX_PROC_SIZE as u64
 }
@@ -281,10 +276,14 @@ pub unsafe fn free(ptr: *mut u8, layout: Layout) {
     let top = proc.allocator.lock().top();
     if bottom <= ptr && ptr < top {
         proc.allocator.dealloc(ptr, layout);
-    } else { // FIXME: Uncomment to see errors
-         //let size = layout.size();
-         //let plural = if size != 1 { "s" } else { "" };
-         //debug!("Could not free {} byte{} at {:#?}", size, plural, ptr);
+    } else {
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+        // FIXME: This for some reason errors the shell
+        // with `Error: Could not allocate 7962624 bytes`
+        let size = layout.size();
+        let plural = if size != 1 { "s" } else { "" };
+        debug!("Could not free {} byte{} at {:#?}", size, plural, ptr);
+        * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
     }
 }
 

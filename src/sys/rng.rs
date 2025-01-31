@@ -19,6 +19,10 @@ impl Random {
     pub fn new() -> Self {
         Self {}
     }
+
+    pub fn size() -> usize {
+        8
+    }
 }
 
 impl FileIO for Random {
