@@ -54,10 +54,16 @@ pub fn init(boot_info: &'static BootInfo) {
         last_end_addr = end_addr;
     }
 
-    // FIXME: There are two small reserved areas at the end of the physical
-    // memory that should be removed from the count to be fully accurate but
-    // their sizes and location vary depending on the amount of RAM on the
-    // system. It doesn't affect the count in megabytes.
+    // Subtract reserved areas at the end of physical memory to compute the accurate size.
+    let mut reserved = 0;
+    for region in boot_info.memory_map.iter().rev() {
+        if region.region_type == MemoryRegionType::Reserved {
+            reserved += region.range.end_addr() - region.range.start_addr();
+        } else {
+            break;
+        }
+    }
+    memory_size = memory_size.saturating_sub(reserved);
     log!("RAM {} MB", memory_size >> 20);
     MEMORY_SIZE.store(memory_size as usize, Ordering::Relaxed);
 

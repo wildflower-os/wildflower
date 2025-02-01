@@ -31,7 +31,7 @@ impl FileIO for VgaFont {
         if let Ok(font) = Font::try_from(buf) {
             *FONT.lock() = Some(font.clone());
             write_font(&font);
-            Ok(buf.len()) // TODO: Use font.data.len() ?
+            Ok(font.data.len())
         } else {
             Err(())
         }

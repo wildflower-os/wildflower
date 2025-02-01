@@ -158,7 +158,6 @@ impl FileInfo {
         self.kind == FileType::Device
     }
 
-    // TODO: Use bincode?
     pub fn as_bytes(&self) -> Vec<u8> {
         debug_assert!(self.name.len() < 256);
         let mut res = Vec::new();

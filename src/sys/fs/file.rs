@@ -51,7 +51,7 @@ impl File {
         let dirname = dirname(&pathname);
         let filename = filename(&pathname);
         if let Some(mut dir) = Dir::open(dirname) {
-            if let Some(dir_entry) = dir.create_file(filename) {
+            if let Ok(dir_entry) = dir.create_file(filename) {
                 return Some(dir_entry.into());
             }
         }

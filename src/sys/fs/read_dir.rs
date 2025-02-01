@@ -7,7 +7,6 @@ use alloc::string::String;
 use core::convert::TryInto;
 
 pub struct ReadDir {
-    // TODO: make those fields private
     pub dir: Dir,
     pub block: LinkedBlock,
     pub block_offset: usize,

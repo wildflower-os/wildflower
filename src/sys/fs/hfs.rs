@@ -79,12 +79,10 @@ impl HiddenFS {
             data.extend(data_len.to_le_bytes());
             data.extend(&file.data);
         }
-        // TODO: Implement disk write to a hidden location
         Self::write_storage(&data);
     }
 
     fn load_from_disk(&self) {
-        // TODO: Implement disk read from a hidden location
         let data = Self::read_storage();
 
         let mut cursor = 0;

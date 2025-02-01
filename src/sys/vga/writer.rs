@@ -259,6 +259,17 @@ impl Writer {
         self.scroll_buffer[y + dy][x..SCREEN_WIDTH].fill(c);
     }
 
+    fn clear_row_before(&mut self, x: usize, y: usize) {
+        let c = ScreenChar {
+            ascii_code: b' ',
+            color_code: self.color_code,
+        };
+        self.screen_buffer.chars[y][0..x].fill(c);
+
+        let dy = self.scroll_reader;
+        self.scroll_buffer[y + dy][0..x].fill(c);
+    }
+
     pub fn clear_screen(&mut self) {
         self.scroll_reader = 0;
         self.scroll_bottom = SCREEN_HEIGHT;
@@ -469,7 +480,8 @@ impl Perform for Writer {
                     n = param[0] as usize;
                 }
                 match n {
-                    // TODO: 0 and 1, cursor to beginning or to end of screen
+                    0 => self.clear_row_after(self.writer[0], self.writer[1]),
+                    1 => self.clear_row_before(self.writer[0], self.writer[1]),
                     2 => self.clear_screen(),
                     _ => return,
                 }
@@ -485,7 +497,7 @@ impl Perform for Writer {
                 }
                 match n {
                     0 => self.clear_row_after(x, y),
-                    1 => return, // TODO: self.clear_row_before(x, y),
+                    1 => self.clear_row_before(x, y),
                     2 => self.clear_row_after(0, y),
                     _ => return,
                 }

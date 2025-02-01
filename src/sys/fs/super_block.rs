@@ -121,6 +121,6 @@ pub fn inc_alloc_count() {
 
 pub fn dec_alloc_count() {
     let mut sb = SuperBlock::read();
-    sb.alloc_count -= 1; // FIXME: Use saturating substraction
+    sb.alloc_count = sb.alloc_count.saturating_sub(1);
     sb.write();
 }

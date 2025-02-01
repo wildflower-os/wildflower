@@ -91,9 +91,8 @@ impl Dir {
         self.entries().find(|entry| entry.name() == name)
     }
 
-    // TODO: return a Result
-    pub fn create_file(&mut self, name: &str) -> Option<DirEntry> {
-        self.create_entry(FileType::File, name)
+    pub fn create_file(&mut self, name: &str) -> Result<DirEntry, ()> {
+        self.create_entry(FileType::File, name).ok_or(())
     }
 
     pub fn create_dir(&mut self, name: &str) -> Option<DirEntry> {
