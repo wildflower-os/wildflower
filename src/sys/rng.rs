@@ -94,3 +94,11 @@ pub fn init() {
 
     *RNG.lock() = Hc128Rng::from_seed(seed);
 }
+
+#[test_case]
+fn test_random() {
+    let mut buf = [0u8; 8];
+    let mut rng = Random::new();
+    assert_eq!(rng.read(&mut buf), Ok(8));
+    assert_ne!(u64::from_le_bytes(buf), 0);
+}

@@ -68,3 +68,17 @@ fn stop_sound() {
     let tmp = unsafe { speaker.read() } & 0xFC;
     unsafe { speaker.write(tmp) };
 }
+
+#[test_case]
+fn test_speaker() {
+    let mut speaker = Speaker::new();
+    let mut buf = [0u8; 8];
+    assert_eq!(speaker.read(&mut buf), Err(()));
+    assert_eq!(speaker.write(b"440"), Ok(8));
+    assert_eq!(speaker.write(b"0"), Ok(8));
+    assert_eq!(speaker.write(b"0.0"), Ok(8));
+    assert_eq!(speaker.write(b"0.0.0"), Ok(8));
+
+    assert_eq!(speaker.poll(IO::Read), false);
+    assert_eq!(speaker.poll(IO::Write), true);
+}
