@@ -7,4 +7,3 @@ updates:
     ignore:
       - dependency-name: "vte"
       - dependency-name: "bootloader"
-      - dependency-name: "nom"
