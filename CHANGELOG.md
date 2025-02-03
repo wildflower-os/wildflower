@@ -2,6 +2,9 @@
 All notable changes to Wildflower after the MOROS fork will be documented in this file.
 
 ## [Unreleased]
+- Increase instruction port size from u16 to u32
+
+## [0.1.0-alpha2] - 2025-02-03
 - Removal of multiple TODOs
 - Removal of multiple FIXMEs
 - More test cases
