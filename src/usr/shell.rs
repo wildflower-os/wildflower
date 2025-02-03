@@ -277,6 +277,18 @@ fn cmd_change_dir(args: &[&str], config: &mut Config) -> Result<(), ExitCode> {
             Ok(())
         }
         2 => {
+            // Disallow changing to /hfs
+            if args[1] == "/hfs" || args[1] == "/hfs/" {
+                #[cfg(not(test))]
+                error!("Permission denied. HFS is non-accessible by users.");
+                return Err(ExitCode::Failure);
+            }
+            // Check if in root directory and tries to go into /hfs
+            if sys::process::dir() == "/" && (args[1] == "hfs" || args[1] == "hfs/") {
+                #[cfg(not(test))]
+                error!("Permission denied. HFS is non-accessible by users.");
+                return Err(ExitCode::Failure);
+            }
             let mut path = fs::realpath(args[1]);
             if path.len() > 1 {
                 path = path.trim_end_matches('/').into();
@@ -765,4 +777,14 @@ fn test_variables_expansion() {
         variables_expansion("print \"Hello $bar\"", &mut config),
         "print \"Hello Alice and Bob\""
     );
+}
+
+#[test_case]
+fn test_hfs_permissions() {
+    let mut config = Config::new();
+    assert_eq!(cmd_change_dir(&["cd", "/hfs"], &mut config), Err(ExitCode::Failure));
+    assert_eq!(cmd_change_dir(&["cd", "/hfs/"], &mut config), Err(ExitCode::Failure));
+    assert_eq!(cmd_change_dir(&["cd", "/"], &mut config), Ok(()));
+    assert_eq!(cmd_change_dir(&["cd", "hfs"], &mut config), Err(ExitCode::Failure));
+    assert_eq!(cmd_change_dir(&["cd", "hfs/"], &mut config), Err(ExitCode::Failure));
 }
