@@ -8,8 +8,6 @@ mod file;
 mod read_dir;
 mod super_block;
 
-pub mod hfs;
-
 use crate::sys;
 
 pub use crate::api::fs::{dirname, filename, realpath, FileIO, IO};
