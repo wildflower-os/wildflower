@@ -1,6 +1,8 @@
 # Changelog
 All notable changes to Wildflower after the MOROS fork will be documented in this file.
 
+Please note, this does not include minor errors.
+
 ## [Unreleased]
 - Increase instruction port size from u16 to u32
 
