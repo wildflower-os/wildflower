@@ -135,3 +135,7 @@ wfos:
 all:
 	make build
 	make wfos
+
+remake:
+	rm -f disk.img
+	make all
