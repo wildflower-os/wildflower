@@ -30,7 +30,7 @@ enum Command {
 }
 
 enum IdentifyResponse {
-    Ata([u32; 128]),
+    Ata([u16; 256]),
     Atapi,
     Sata,
     None,
@@ -56,7 +56,7 @@ pub struct Bus {
     id: u8,
     irq: u8,
 
-    data_register: Port<u32>,
+    data_register: Port<u16>,
     error_register: PortReadOnly<u8>,
     features_register: PortWriteOnly<u8>,
     sector_count_register: Port<u8>,
@@ -120,11 +120,11 @@ impl Bus {
         unsafe { self.lba2_register.read() }
     }
 
-    fn read_data(&mut self) -> u32 {
+    fn read_data(&mut self) -> u16 {
         unsafe { self.data_register.read() }
     }
 
-    fn write_data(&mut self, data: u32) {
+    fn write_data(&mut self, data: u16) {
         unsafe { self.data_register.write(data) }
     }
 
@@ -214,7 +214,7 @@ impl Bus {
         debug_assert!(buf.len() == BLOCK_SIZE);
         self.setup_pio(drive, block)?;
         self.write_command(Command::Read)?;
-        for chunk in buf.chunks_mut(4) {
+        for chunk in buf.chunks_mut(2) {
             let data = self.read_data().to_le_bytes();
             chunk.clone_from_slice(&data);
         }
@@ -231,8 +231,8 @@ impl Bus {
         debug_assert!(buf.len() == BLOCK_SIZE);
         self.setup_pio(drive, block)?;
         self.write_command(Command::Write)?;
-        for chunk in buf.chunks(4) {
-            let data = u32::from_le_bytes(chunk.try_into().unwrap());
+        for chunk in buf.chunks(2) {
+            let data = u16::from_le_bytes(chunk.try_into().unwrap());
             self.write_data(data);
         }
         if self.is_error() {
@@ -258,7 +258,7 @@ impl Bus {
             }
         }
         match (self.lba1(), self.lba2()) {
-            (0x00, 0x00) => Ok(IdentifyResponse::Ata([(); 128].map(|_| self.read_data()))),
+            (0x00, 0x00) => Ok(IdentifyResponse::Ata([(); 256].map(|_| self.read_data()))),
             (0x14, 0xEB) => Ok(IdentifyResponse::Atapi),
             (0x3C, 0xC3) => Ok(IdentifyResponse::Sata),
             (_, _) => Err(()),
@@ -325,7 +325,7 @@ impl Drive {
         let mut buses = BUSES.lock();
         let res = buses[bus as usize].identify_drive(dsk);
         if let Ok(IdentifyResponse::Ata(res)) = res {
-            let buf = res.map(u32::to_be_bytes).concat();
+            let buf = res.map(u16::to_be_bytes).concat();
             let model = String::from_utf8_lossy(&buf[54..94]).trim().into();
             let serial = String::from_utf8_lossy(&buf[20..40]).trim().into();
             let block_count = u32::from_be_bytes(buf[120..124].try_into().unwrap()).rotate_left(16);
