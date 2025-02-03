@@ -5,6 +5,7 @@ Please note, this does not include minor errors.
 
 ## [Unreleased]
 - Add persistence to the HFS
+- Add bounds checking to the HFS
 
 ## [0.1.0-alpha2] - 2025-02-03
 - Removal of multiple TODOs
