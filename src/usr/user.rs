@@ -7,6 +7,7 @@ use crate::api::rng;
 use crate::api::syscall;
 use crate::sys;
 
+use alloc::borrow::ToOwned;
 use alloc::collections::btree_map::BTreeMap;
 use alloc::format;
 use alloc::string::{String, ToString};
@@ -85,7 +86,6 @@ fn login(username: &str) -> Result<(), ExitCode> {
     sys::process::set_env("USER", username);
     sys::process::set_env("HOME", &home);
 
-    // TODO: load shell
     Ok(())
 }
 
@@ -184,7 +184,7 @@ fn hash(password: &str) -> String {
 
     // Encoding in Base64 standard without padding
     let c = c.to_be_bytes();
-    let mut res: String = String::from(v);
+    let mut res: String = String::from(v.to_owned());
     res.push('$');
     res.push_str(&String::from_utf8(Base64::encode(&c)).unwrap());
     res.push('$');
