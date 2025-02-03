@@ -19,6 +19,8 @@ pub fn main(args: &[&str]) -> Result<(), ExitCode> {
         return Ok(());
     }
 
+    crate::api::hfs::check_hfs_bounds(args[1])?;
+
     let pathname = args[1];
     let mut viewer = Viewer::new(pathname);
     viewer.run()

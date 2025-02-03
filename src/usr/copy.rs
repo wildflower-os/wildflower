@@ -13,7 +13,10 @@ pub fn main(args: &[&str]) -> Result<(), ExitCode> {
                 help();
                 return Ok(());
             }
-            _ => continue,
+            _ => {
+                crate::api::hfs::check_hfs_bounds(i)?;
+                continue;
+            }
         }
     }
     if n != 3 {

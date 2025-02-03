@@ -27,7 +27,10 @@ pub fn main(args: &[&str]) -> Result<(), ExitCode> {
                     return Err(ExitCode::UsageError);
                 }
             }
-            _ => opt.push(args[i]),
+            _ => {
+                crate::api::hfs::check_hfs_bounds(args[i])?;
+                opt.push(args[i])
+            },
         }
         i += 1;
     }

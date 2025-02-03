@@ -18,6 +18,9 @@ pub fn main(args: &[&str]) -> Result<(), ExitCode> {
         help();
         return Ok(());
     }
+
+    crate::api::hfs::check_hfs_bounds(args[1])?;
+
     let mut path = args[1];
 
     // The commands `read /usr/alice/` and `read /usr/alice` are equivalent,

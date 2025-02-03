@@ -11,6 +11,8 @@ pub fn main(args: &[&str]) -> Result<(), ExitCode> {
         return Err(ExitCode::UsageError);
     }
 
+    crate::api::hfs::check_hfs_bounds(args[1])?;
+
     let path = args[1];
 
     if let Ok(mut buf) = fs::read_to_bytes(path) {

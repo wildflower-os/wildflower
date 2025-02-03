@@ -9,13 +9,19 @@ pub fn main(args: &[&str]) -> Result<(), ExitCode> {
         help();
         return Err(ExitCode::UsageError);
     }
+
+    crate::api::hfs::check_hfs_bounds(args[1])?;
+
     for i in 1..n {
         match args[i] {
             "-h" | "--help" => {
                 help();
                 return Ok(());
             }
-            _ => continue,
+            _ => {
+                crate::api::hfs::check_hfs_bounds(args[i])?;
+                continue;
+            }
         }
     }
 

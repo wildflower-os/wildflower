@@ -831,6 +831,7 @@ fn help() {
 }
 
 pub fn main(args: &[&str]) -> Result<(), ExitCode> {
+    // If args[1] exist, check for hfs bounds
     let mut path = "";
     let mut cmd = "";
     let mut i = 1;
@@ -851,6 +852,7 @@ pub fn main(args: &[&str]) -> Result<(), ExitCode> {
                 }
             }
             _ => {
+                crate::api::hfs::check_hfs_bounds(args[i])?;
                 if args[i].starts_with('-') {
                     error!("Invalid option '{}'", args[i]);
                     return Err(ExitCode::UsageError);

@@ -277,18 +277,7 @@ fn cmd_change_dir(args: &[&str], config: &mut Config) -> Result<(), ExitCode> {
             Ok(())
         }
         2 => {
-            // Disallow changing to /hfs
-            if args[1] == "/hfs" || args[1] == "/hfs/" {
-                #[cfg(not(test))]
-                error!("Permission denied. HFS is non-accessible by users.");
-                return Err(ExitCode::Failure);
-            }
-            // Check if in root directory and tries to go into /hfs
-            if sys::process::dir() == "/" && (args[1] == "hfs" || args[1] == "hfs/") {
-                #[cfg(not(test))]
-                error!("Permission denied. HFS is non-accessible by users.");
-                return Err(ExitCode::Failure);
-            }
+            crate::api::hfs::check_hfs_bounds(args[1])?;
             let mut path = fs::realpath(args[1]);
             if path.len() > 1 {
                 path = path.trim_end_matches('/').into();
