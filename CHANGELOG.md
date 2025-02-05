@@ -4,6 +4,8 @@ All notable changes to Wildflower after the MOROS fork will be documented in thi
 Please note, this does not include minor errors.
 
 ## [Unreleased]
+
+## [0.1.0-alpha3] - 2025-02-05
 - Add persistence to the HFS
 - Add bounds checking to the HFS
 - Use `nasm` for rebooting (Currently breaks the `print/echo` and the `sleep` commands, as the `nasm` counterparts are not implemented yet)
