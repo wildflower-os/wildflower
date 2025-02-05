@@ -139,3 +139,13 @@ all:
 remake:
 	rm -f disk.img
 	make all
+
+remake-nasm:
+	rm -f disk.img
+	make user-nasm
+	make all
+
+remake-rust:
+	rm -f disk.img
+	make user-rust
+	make all

@@ -1,18 +1,20 @@
 [bits 64]
 
 section .data
-msg: db "Not implemented", 10
-len: equ $-msg
+message: db "WildflowerOS is rebooting.", 0xa
+message_len: equ $ - message
 
-global _start
 section .text
+global _start
 _start:
-  mov rax, 4                ; syscall number for WRITE
-  mov rdi, 1                ; standard output
-  mov rsi, msg              ; addr of string
-  mov rdx, len              ; size of string
+  ; Write message to stdout
+  mov rax, 4            ; syscall: write
+  mov rdi, 1            ; stdout
+  lea rsi, [rel message]
+  mov rdx, message_len
   int 0x80
 
-  mov rax, 1                ; syscall number for EXIT
-  mov rdi, 0                ; no error
+  ; Call the kernel STOP syscall (0x0A) to trigger reboot with exit code 0xCAFE
+  mov rax, 0x0A         ; syscall: stop
+  mov rdi, 0xCAFE       ; exit/reboot code
   int 0x80
