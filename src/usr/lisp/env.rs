@@ -140,6 +140,11 @@ pub fn default_env() -> Rc<RefCell<Env>> {
     data.insert("get".to_string(), Exp::Primitive(primitive::lisp_get));
     data.insert("put".to_string(), Exp::Primitive(primitive::lisp_put));
     data.insert("date".to_string(), Exp::Primitive(primitive::lisp_date));
+    data.insert("vector".to_string(), Exp::Primitive(primitive::lisp_vector));
+    data.insert("block".to_string(), Exp::Primitive(primitive::lisp_block));
+    data.insert("keyword".to_string(), Exp::Primitive(primitive::lisp_keyword));
+    data.insert("struct".to_string(), Exp::Primitive(primitive::lisp_struct));
+    data.insert("enum".to_string(), Exp::Primitive(primitive::lisp_enum));
 
     // Setup autocompletion
     *FUNCTIONS.lock() = data

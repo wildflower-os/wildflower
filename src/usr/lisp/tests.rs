@@ -23,6 +23,21 @@ fn test_lisp() {
         };
     }
 
+    // vectors
+    assert_eq!(eval!("(vector 1 2 3)"), "[1 2 3]");
+
+    // block literal
+    assert_eq!(eval!("(block 1 2 3)"), "{1 2 3}");
+
+    // keyword literal
+    assert_eq!(eval!("(keyword \"foo\")"), ":foo");
+
+    // enum literal:
+    assert_eq!(
+        eval!("(enum Option::Some 42)"),
+        "enum Option::Some(42)"
+    );
+
     // num
     assert_eq!(eval!("6"), "6");
     assert_eq!(eval!("16"), "16");

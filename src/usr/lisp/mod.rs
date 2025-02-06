@@ -34,47 +34,38 @@ use core::fmt;
 use lazy_static::lazy_static;
 use spin::Mutex;
 
-// Wildflower Lisp is a lisp-1 like Scheme and Clojure
-// This was forked from MOROS
-//
-// Eval & Env adapted from Risp
-// Copyright 2019 Stepan Parunashvili
-// https://github.com/stopachka/risp
-//
-// Parser rewritten from scratch using Nom
-// https://github.com/geal/nom
-//
-// References:
-//
-// "Recursive Functions of Symic Expressions and Their Computation by Machine"
-// by John McCarthy (1960)
-//
-// "The Roots of Lisp"
-// by Paul Graham (2002)
-//
-// "Technical Issues of Separation in Function Cells and Value Cells"
-// by Richard P. Gabriel (1982)
-
-// Types
-
 #[derive(Clone)]
 pub enum Exp {
     Primitive(fn(&[Exp]) -> Result<Exp, Err>),
     Function(Box<Function>),
     Macro(Box<Function>),
     List(Vec<Exp>),
+    Vector(Vec<Exp>), // New: vector literal, displayed with []
+    Block(Vec<Exp>),  // New: code block, displayed with {}
     Dict(BTreeMap<String, Exp>),
+    Keyword(String), // New: keywords, prefixed with a colon
     Bool(bool),
     Num(Number),
     Str(String),
     Sym(String),
+    Struct {
+        // New: Rust-like struct literal
+        name: String,
+        fields: BTreeMap<String, Exp>,
+    },
+    Enum {
+        // New: Rust-like enum, variant with optional value
+        name: String,
+        variant: String,
+        value: Option<Box<Exp>>,
+    },
 }
 
 impl Exp {
     pub fn is_truthy(&self) -> bool {
         match self {
             Exp::Bool(b) => *b,
-            Exp::List(l) => !l.is_empty(),
+            Exp::List(l) | Exp::Vector(l) | Exp::Block(l) => !l.is_empty(),
             _ => true,
         }
     }
@@ -86,11 +77,36 @@ impl PartialEq for Exp {
             (Exp::Function(a), Exp::Function(b)) => a == b,
             (Exp::Macro(a), Exp::Macro(b)) => a == b,
             (Exp::List(a), Exp::List(b)) => a == b,
+            (Exp::Vector(a), Exp::Vector(b)) => a == b,
+            (Exp::Block(a), Exp::Block(b)) => a == b,
             (Exp::Dict(a), Exp::Dict(b)) => a == b,
+            (Exp::Keyword(a), Exp::Keyword(b)) => a == b,
             (Exp::Bool(a), Exp::Bool(b)) => a == b,
             (Exp::Num(a), Exp::Num(b)) => a == b,
             (Exp::Str(a), Exp::Str(b)) => a == b,
             (Exp::Sym(a), Exp::Sym(b)) => a == b,
+            (
+                Exp::Struct {
+                    name: an,
+                    fields: af,
+                },
+                Exp::Struct {
+                    name: bn,
+                    fields: bf,
+                },
+            ) => an == bn && af == bf,
+            (
+                Exp::Enum {
+                    name: an,
+                    variant: av,
+                    value: a_val,
+                },
+                Exp::Enum {
+                    name: bn,
+                    variant: bv,
+                    value: b_val,
+                },
+            ) => an == bn && av == bv && a_val == b_val,
             _ => false,
         }
     }
@@ -102,11 +118,39 @@ impl PartialOrd for Exp {
             (Exp::Function(a), Exp::Function(b)) => a.partial_cmp(b),
             (Exp::Macro(a), Exp::Macro(b)) => a.partial_cmp(b),
             (Exp::List(a), Exp::List(b)) => a.partial_cmp(b),
+            (Exp::Vector(a), Exp::Vector(b)) => a.partial_cmp(b),
+            (Exp::Block(a), Exp::Block(b)) => a.partial_cmp(b),
             (Exp::Dict(a), Exp::Dict(b)) => a.partial_cmp(b),
+            (Exp::Keyword(a), Exp::Keyword(b)) => a.partial_cmp(b),
             (Exp::Bool(a), Exp::Bool(b)) => a.partial_cmp(b),
             (Exp::Num(a), Exp::Num(b)) => a.partial_cmp(b),
             (Exp::Str(a), Exp::Str(b)) => a.partial_cmp(b),
             (Exp::Sym(a), Exp::Sym(b)) => a.partial_cmp(b),
+            (
+                Exp::Struct {
+                    name: an,
+                    fields: af,
+                },
+                Exp::Struct {
+                    name: bn,
+                    fields: bf,
+                },
+            ) => an.partial_cmp(bn).or_else(|| af.partial_cmp(bf)),
+            (
+                Exp::Enum {
+                    name: an,
+                    variant: av,
+                    value: a_val,
+                },
+                Exp::Enum {
+                    name: bn,
+                    variant: bv,
+                    value: b_val,
+                },
+            ) => an
+                .partial_cmp(bn)
+                .or_else(|| av.partial_cmp(bv))
+                .or_else(|| a_val.partial_cmp(b_val)),
             _ => None,
         }
     }
@@ -116,7 +160,7 @@ impl fmt::Display for Exp {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let out = match self {
             Exp::Primitive(_) => format!("(function args)"),
-            Exp::Function(f) => format!("(function {})", f.params),
+            Exp::Function(fnc) => format!("(function {})", fnc.params),
             Exp::Macro(m) => format!("(macro {})", m.params),
             Exp::Bool(a) => a.to_string(),
             Exp::Num(n) => n.to_string(),
@@ -128,11 +172,35 @@ impl fmt::Display for Exp {
                 let xs: Vec<_> = list.iter().map(|x| x.to_string()).collect();
                 format!("({})", xs.join(" "))
             }
+            Exp::Vector(vecs) => {
+                let xs: Vec<_> = vecs.iter().map(|x| x.to_string()).collect();
+                format!("[{}]", xs.join(" "))
+            }
+            Exp::Block(stmts) => {
+                let xs: Vec<_> = stmts.iter().map(|x| x.to_string()).collect();
+                format!("{{{}}}", xs.join(" "))
+            }
             Exp::Dict(dict) => {
                 let mut xs: Vec<_> = dict.iter().map(|(k, v)| format!("{} {}", k, v)).collect();
                 xs.insert(0, "dict".into());
                 format!("({})", xs.join(" "))
             }
+            Exp::Keyword(kw) => format!(":{}", kw),
+            Exp::Struct { name, fields } => {
+                let xs: Vec<_> = fields
+                    .iter()
+                    .map(|(k, v)| format!("{}: {}", k, v))
+                    .collect();
+                format!("struct {} {{ {} }}", name, xs.join(", "))
+            }
+            Exp::Enum {
+                name,
+                variant,
+                value,
+            } => match value {
+                Some(val) => format!("enum {}::{}({})", name, variant, val),
+                None => format!("enum {}::{}", name, variant),
+            },
         };
         write!(f, "{}", out)
     }
@@ -195,10 +263,31 @@ macro_rules! ensure_list {
 }
 
 #[macro_export]
+macro_rules! ensure_struct {
+    ($exp:expr) => {
+        match $exp {
+            Exp::Struct { .. } => {}
+            _ => return expected!("a struct"),
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! ensure_enum {
+    ($exp:expr) => {
+        match $exp {
+            Exp::Enum { .. } => {}
+            _ => return expected!("an enum"),
+        }
+    };
+}
+
+#[macro_export]
 macro_rules! expected {
     ($($arg:tt)*) => ({
         use alloc::format;
-        Err(Err::Reason(format!("Expected {}", format_args!($($arg)*))))
+        Err(Err::Reason(format!("Expected {}", format_args!($($arg)*)))
+    )
     });
 }
 
@@ -275,7 +364,7 @@ fn repl(env: &mut Rc<RefCell<Env>>) -> Result<(), ExitCode> {
     let csi_reset = Style::reset();
     let prompt_string = format!("{}>{} ", csi_color, csi_reset);
 
-    println!("Wildflower Lisp v0.7.0\n");
+    println!("Flower Lisp v0.1.0\n");
 
     let mut prompt = Prompt::new();
     let history_file = "~/.lisp-history";

@@ -12,6 +12,7 @@ use crate::usr::host;
 use crate::usr::shell;
 use crate::{could_not, ensure_length_eq, ensure_length_gt, expected};
 
+use alloc::boxed::Box;
 use alloc::collections::btree_map::BTreeMap;
 use alloc::format;
 use alloc::string::String;
@@ -24,6 +25,67 @@ use core::convert::TryInto;
 use core::str::FromStr;
 use num_bigint::BigInt;
 use smoltcp::wire::IpAddress;
+
+pub fn lisp_vector(args: &[Exp]) -> Result<Exp, Err> {
+    // Constructs a vector literal from its arguments.
+    Ok(Exp::Vector(args.to_vec()))
+}
+
+pub fn lisp_block(args: &[Exp]) -> Result<Exp, Err> {
+    // Constructs a block (code block) literal from its arguments.
+    Ok(Exp::Block(args.to_vec()))
+}
+
+pub fn lisp_keyword(args: &[Exp]) -> Result<Exp, Err> {
+    ensure_length_eq!(args, 1);
+    let s = string(&args[0])?;
+    // Constructs a keyword, note that keywords are stored without the ':'.
+    Ok(Exp::Keyword(s))
+}
+
+pub fn lisp_struct(args: &[Exp]) -> Result<Exp, Err> {
+    // Expects at least a name and one field (so an odd number of arguments)
+    ensure_length_gt!(args, 1);
+    if args.len() % 2 == 0 {
+        return expected!("an odd number of arguments (name and field pairs) for struct");
+    }
+    let name = match &args[0] {
+        Exp::Sym(s) => s.clone(),
+        _ => return expected!("a symbol for struct name"),
+    };
+    let mut fields = BTreeMap::new();
+    // Process the field pairs.
+    for pair in args[1..].chunks(2) {
+        let key = match &pair[0] {
+            Exp::Sym(s) => s.clone(),
+            _ => return expected!("struct field name must be a symbol"),
+        };
+        fields.insert(key, pair[1].clone());
+    }
+    Ok(Exp::Struct { name, fields })
+}
+
+pub fn lisp_enum(args: &[Exp]) -> Result<Exp, Err> {
+    // Expects at least the enum name and variant (so a minimum of 2 arguments)
+    ensure_length_gt!(args, 1);
+    if args.len() < 2 {
+        return expected!("at least two arguments (enum name and variant) for enum");
+    }
+    let name = match &args[0] {
+        Exp::Sym(s) => s.clone(),
+        _ => return expected!("a symbol for enum name"),
+    };
+    let variant = match &args[1] {
+        Exp::Sym(s) => s.clone(),
+        _ => return expected!("a symbol for enum variant"),
+    };
+    let value = if args.len() > 2 {
+        Some(Box::new(args[2].clone()))
+    } else {
+        None
+    };
+    Ok(Exp::Enum { name, variant, value })
+}
 
 pub fn lisp_eq(args: &[Exp]) -> Result<Exp, Err> {
     Ok(Exp::Bool(
@@ -294,6 +356,11 @@ pub fn lisp_type(args: &[Exp]) -> Result<Exp, Err> {
         Exp::Str(_) => "string",
         Exp::Sym(_) => "symbol",
         Exp::Num(_) => "number",
+        Exp::Enum { .. } => "enum",
+        Exp::Vector(_) => "vector",
+        Exp::Block(_) => "block",
+        Exp::Struct { .. } => "struct",
+        Exp::Keyword(_) => "keyword",
     };
     Ok(Exp::Str(exp.to_string()))
 }
@@ -607,7 +674,7 @@ pub fn lisp_get(args: &[Exp]) -> Result<Exp, Err> {
             if let Some(v) = l.get(i) {
                 Ok(v.clone())
             } else {
-                Ok(Exp::List(Vec::new()))
+                Ok(Exp::List(vec![]))
             }
         }
         Exp::Str(s) => {
@@ -618,7 +685,16 @@ pub fn lisp_get(args: &[Exp]) -> Result<Exp, Err> {
                 Ok(Exp::Str("".to_string()))
             }
         }
-        _ => expected!("first argument to be a dict, a list, or a string"),
+        // New: allow field lookup on a struct literal.
+        Exp::Struct { ref fields, .. } => {
+            let key = format!("{}", args[1]);
+            if let Some(v) = fields.get(&key) {
+                Ok(v.clone())
+            } else {
+                Ok(Exp::List(vec![]))
+            }
+        }
+        _ => expected!("first argument to be a dict, a list, a string, or a struct"),
     }
 }
 
@@ -647,7 +723,17 @@ pub fn lisp_put(args: &[Exp]) -> Result<Exp, Err> {
             let s: String = s.into_iter().collect();
             Ok(Exp::Str(s))
         }
-        _ => expected!("first argument to be a dict, a list, or a string"),
+        // New: support updating a struct literal.
+        Exp::Struct { ref name, ref fields } => {
+            let mut new_fields = fields.clone();
+            let key = format!("{}", args[1]);
+            new_fields.insert(key, args[2].clone());
+            Ok(Exp::Struct {
+                name: name.clone(),
+                fields: new_fields,
+            })
+        }
+        _ => expected!("first argument to be a dict, a list, a string, or a struct"),
     }
 }
 
