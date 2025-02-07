@@ -66,7 +66,7 @@ fn float(input: &str) -> IResult<&str, &str> {
 }
 
 fn is_symbol_letter(c: char) -> bool {
-    let chars = "$<>=-+*/%^?!.";
+    let chars = "$<>=-+*/%^?!._";
     c.is_alphanumeric() || chars.contains(c)
 }
 

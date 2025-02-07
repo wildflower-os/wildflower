@@ -25,9 +25,13 @@ fn test_lisp() {
 
     // vectors
     assert_eq!(eval!("(vector 1 2 3)"), "[1 2 3]");
+    assert_eq!(eval!("(get (vector 10 20 30) 1)"), "20");
+    assert_eq!(eval!("(put (vector 10 20 30) 1 25)"), "[10 25 30]");
 
     // block literal
     assert_eq!(eval!("(block 1 2 3)"), "{1 2 3}");
+    assert_eq!(eval!("(get (block 10 20 30) 1)"), "20");
+    assert_eq!(eval!("(put (block 10 20 30) 1 25)"), "{10 25 30}");
 
     // keyword literal
     assert_eq!(eval!("(keyword \"foo\")"), ":foo");
@@ -42,6 +46,84 @@ fn test_lisp() {
     assert_eq!(
         eval!("(enum Option::Some 42)"),
         "enum Option::Some(42)"
+    );
+
+    // struct/get: retrieves field "name" from a struct literal
+    assert_eq!(
+        eval!("(struct/get (struct Person name \"Alice\" age 30) 'name)"),
+        "\"Alice\""
+    );
+
+    // keyword/name: returns the name of the keyword as a string
+    assert_eq!(
+        eval!("(keyword/name (keyword \"foo\"))"),
+        "\"foo\""
+    );
+
+    // enum/info: returns a list with the variant and value
+    assert_eq!(
+        eval!("(enum/info (enum Option::Some 42))"),
+        "(\"Option\" \"Some\" 42)"
+    );
+
+    // vector/push: pushes an element onto a vector
+    assert_eq!(
+        eval!("(vector/push (vector 1 2 3) 4)"),
+        "[1 2 3 4]"
+    );
+
+    // vector/pop: pops the last element off a vector and returns a tuple (popped, updated vector)
+    assert_eq!(
+        eval!("(vector/pop (vector 1 2 3))"),
+        "(3 [1 2])"
+    );
+
+    // list/append: appends an element to the end of a list
+    assert_eq!(
+        eval!("(list/append (list 1 2) 3)"),
+        "(1 2 3)"
+    );
+
+    // list/prepend: prepends an element to the beginning of a list
+    assert_eq!(
+        eval!("(list/prepend (list 2 3) 1)"),
+        "(1 2 3)"
+    );
+
+    // dict/keys: returns the keys of a dictionary as a list
+    assert_eq!(
+        eval!("(dict/keys (dict \"a\" 1 \"b\" 2))"),
+        "(\"a\" \"b\")"
+    );
+
+    // dict/values: returns the values of a dictionary as a list
+    assert_eq!(
+        eval!("(dict/values (dict \"a\" 1 \"b\" 2))"),
+        "(1 2)"
+    );
+
+    // block/eval: evaluates a block and returns the value of each expression
+    assert_eq!(
+        eval!("(block/eval {1 2 3})"),
+        "(1 2 3)"
+    );
+
+    // block/length: returns the number of expressions in a block
+    assert_eq!(
+        eval!("(block/length {10 20 30})"),
+        "3"
+    );
+
+    // block/to_list: converts a block to a list
+    assert_eq!(
+        eval!("(block/to_list {1 2 3})"),
+        "(1 2 3)"
+    );
+
+    // block/to_vector: converts a block to a vector
+    assert_eq!(
+        eval!("(block/to_vector {1 2 3})"),
+        "[1 2 3]"
     );
 
     // num
