@@ -218,6 +218,9 @@ pub fn eval(exp: &Exp, env: &mut Rc<RefCell<Env>>) -> Result<Exp, Err> {
                 ensure_length_gt!(list, 0);
                 let args = &list[1..];
                 match &list[0] {
+                    Exp::Sym(s) if s == "struct" => {
+                        return crate::usr::lisp::primitive::lisp_struct(args);
+                    }
                     Exp::Sym(s) if s == "quote" => {
                         return eval_quote_args(args);
                     }

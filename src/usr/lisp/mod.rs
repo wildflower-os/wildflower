@@ -40,21 +40,19 @@ pub enum Exp {
     Function(Box<Function>),
     Macro(Box<Function>),
     List(Vec<Exp>),
-    Vector(Vec<Exp>), // New: vector literal, displayed with []
-    Block(Vec<Exp>),  // New: code block, displayed with {}
+    Vector(Vec<Exp>),
+    Block(Vec<Exp>),
     Dict(BTreeMap<String, Exp>),
-    Keyword(String), // New: keywords, prefixed with a colon
+    Keyword(String),
     Bool(bool),
     Num(Number),
     Str(String),
     Sym(String),
     Struct {
-        // New: Rust-like struct literal
         name: String,
         fields: BTreeMap<String, Exp>,
     },
     Enum {
-        // New: Rust-like enum, variant with optional value
         name: String,
         variant: String,
         value: Option<Box<Exp>>,

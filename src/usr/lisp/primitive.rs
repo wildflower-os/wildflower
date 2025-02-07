@@ -44,24 +44,23 @@ pub fn lisp_keyword(args: &[Exp]) -> Result<Exp, Err> {
 }
 
 pub fn lisp_struct(args: &[Exp]) -> Result<Exp, Err> {
-    // Expects at least a name and one field (so an odd number of arguments)
     ensure_length_gt!(args, 1);
     if args.len() % 2 == 0 {
         return expected!("an odd number of arguments (name and field pairs) for struct");
     }
     let name = match &args[0] {
         Exp::Sym(s) => s.clone(),
-        _ => return expected!("a symbol for struct name"),
+        exp => format!("{}", exp),
     };
-    let mut fields = BTreeMap::new();
-    // Process the field pairs.
+    let mut fields_vec = Vec::new();
     for pair in args[1..].chunks(2) {
         let key = match &pair[0] {
             Exp::Sym(s) => s.clone(),
             _ => return expected!("struct field name must be a symbol"),
         };
-        fields.insert(key, pair[1].clone());
+        fields_vec.push((key, pair[1].clone()));
     }
+    let fields: BTreeMap<String, Exp> = fields_vec.into_iter().collect();
     Ok(Exp::Struct { name, fields })
 }
 

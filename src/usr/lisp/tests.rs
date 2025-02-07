@@ -32,6 +32,12 @@ fn test_lisp() {
     // keyword literal
     assert_eq!(eval!("(keyword \"foo\")"), ":foo");
 
+    // struct literal
+    assert_eq!(
+        eval!("(struct Person name \"Alice\" age 30)"),
+        "struct Person { age: 30, name: \"Alice\" }" // BTreeMap changes order
+    );
+
     // enum literal:
     assert_eq!(
         eval!("(enum Option::Some 42)"),
