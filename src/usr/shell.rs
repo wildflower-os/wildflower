@@ -545,6 +545,7 @@ fn dispatch(args: &[&str], config: &mut Config) -> Result<(), ExitCode> {
         "pci" => usr::pci::main(args),
         "pi" => usr::pi::main(args),
         "play" => usr::play::main(args),
+        "print" => usr::print::main(args),
         "quit" => Err(ExitCode::ShellExit),
         "read" | "cat" => usr::read::main(args),
         "render" => usr::render::main(args),

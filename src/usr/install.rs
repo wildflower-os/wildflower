@@ -41,7 +41,6 @@ pub fn copy_files(verbose: bool) {
     //copy_file!("/bin/mandelbrot", verbose);
     copy_file!("/bin/ntp", verbose);
     copy_file!("/bin/pkg", verbose);
-    copy_file!("/bin/print", verbose);
     copy_file!("/bin/reboot", verbose);
     copy_file!("/bin/sleep", verbose);
 
