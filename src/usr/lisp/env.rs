@@ -140,6 +140,27 @@ pub fn default_env() -> Rc<RefCell<Env>> {
     data.insert("get".to_string(), Exp::Primitive(primitive::lisp_get));
     data.insert("put".to_string(), Exp::Primitive(primitive::lisp_put));
     data.insert("date".to_string(), Exp::Primitive(primitive::lisp_date));
+    data.insert("vector".to_string(), Exp::Primitive(primitive::lisp_vector));
+    data.insert("block".to_string(), Exp::Primitive(primitive::lisp_block));
+    data.insert("keyword".to_string(), Exp::Primitive(primitive::lisp_keyword));
+    data.insert("struct".to_string(), Exp::Primitive(primitive::lisp_struct));
+    data.insert("enum".to_string(), Exp::Primitive(primitive::lisp_enum));
+
+    data.insert("struct/get".to_string(), Exp::Primitive(primitive::lisp_struct_get));
+    data.insert("keyword/name".to_string(), Exp::Primitive(primitive::lisp_keyword_name));
+    data.insert("enum/info".to_string(), Exp::Primitive(primitive::lisp_enum_info));
+    data.insert("vector/push".to_string(), Exp::Primitive(primitive::lisp_vector_push));
+    data.insert("vector/pop".to_string(), Exp::Primitive(primitive::lisp_vector_pop));
+    data.insert("list/append".to_string(), Exp::Primitive(primitive::lisp_list_append));
+    data.insert("list/prepend".to_string(), Exp::Primitive(primitive::lisp_list_prepend));
+    data.insert("dict/keys".to_string(), Exp::Primitive(primitive::lisp_dict_keys));
+    data.insert("dict/values".to_string(), Exp::Primitive(primitive::lisp_dict_values));
+    data.insert("block/eval".to_string(), Exp::Primitive(primitive::lisp_block_eval));
+    data.insert("block/length".to_string(), Exp::Primitive(primitive::lisp_block_length));
+    data.insert("block/to_list".to_string(), Exp::Primitive(primitive::lisp_block_to_list));
+    data.insert("block/to_vector".to_string(), Exp::Primitive(primitive::lisp_block_to_vector));
+    data.insert("block/length".to_string(), Exp::Primitive(primitive::lisp_block_length));
+
 
     // Setup autocompletion
     *FUNCTIONS.lock() = data

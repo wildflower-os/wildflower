@@ -9,9 +9,11 @@ use crate::api::syscall;
 use crate::api::time::format_offset_time;
 use crate::sys::fs::OpenFlag;
 use crate::usr::host;
+use crate::usr::lisp::env::default_env;
 use crate::usr::shell;
 use crate::{could_not, ensure_length_eq, ensure_length_gt, expected};
 
+use alloc::boxed::Box;
 use alloc::collections::btree_map::BTreeMap;
 use alloc::format;
 use alloc::string::String;
@@ -24,6 +26,242 @@ use core::convert::TryInto;
 use core::str::FromStr;
 use num_bigint::BigInt;
 use smoltcp::wire::IpAddress;
+
+pub fn lisp_vector(args: &[Exp]) -> Result<Exp, Err> {
+    // Constructs a vector literal from its arguments.
+    Ok(Exp::Vector(args.to_vec()))
+}
+
+pub fn lisp_block(args: &[Exp]) -> Result<Exp, Err> {
+    // Constructs a block (code block) literal from its arguments.
+    Ok(Exp::Block(args.to_vec()))
+}
+
+pub fn lisp_keyword(args: &[Exp]) -> Result<Exp, Err> {
+    ensure_length_eq!(args, 1);
+    let s = string(&args[0])?;
+    // Constructs a keyword, note that keywords are stored without the ':'.
+    Ok(Exp::Keyword(s))
+}
+
+pub fn lisp_struct(args: &[Exp]) -> Result<Exp, Err> {
+    ensure_length_gt!(args, 1);
+    if args.len() % 2 == 0 {
+        return expected!("an odd number of arguments (name and field pairs) for struct");
+    }
+    let name = match &args[0] {
+        Exp::Sym(s) => s.clone(),
+        exp => format!("{}", exp),
+    };
+    let mut fields_vec = Vec::new();
+    for pair in args[1..].chunks(2) {
+        let key = match &pair[0] {
+            Exp::Sym(s) => s.clone(),
+            _ => return expected!("struct field name must be a symbol"),
+        };
+        fields_vec.push((key, pair[1].clone()));
+    }
+    let fields: BTreeMap<String, Exp> = fields_vec.into_iter().collect();
+    Ok(Exp::Struct { name, fields })
+}
+
+pub fn lisp_enum(args: &[Exp]) -> Result<Exp, Err> {
+    // Expects at least the enum name and variant (so a minimum of 2 arguments)
+    ensure_length_gt!(args, 1);
+    if args.len() < 2 {
+        return expected!("at least two arguments (enum name and variant) for enum");
+    }
+    let name = match &args[0] {
+        Exp::Sym(s) => s.clone(),
+        _ => return expected!("a symbol for enum name"),
+    };
+    let variant = match &args[1] {
+        Exp::Sym(s) => s.clone(),
+        _ => return expected!("a symbol for enum variant"),
+    };
+    let value = if args.len() > 2 {
+        Some(Box::new(args[2].clone()))
+    } else {
+        None
+    };
+    Ok(Exp::Enum { name, variant, value })
+}
+
+/// Returns the value of a field in a struct. Usage: (struct/get my-struct field)
+pub fn lisp_struct_get(args: &[Exp]) -> Result<Exp, Err> {
+    ensure_length_eq!(args, 2);
+    match &args[0] {
+        Exp::Struct { name: _, fields } => {
+            let key = match &args[1] {
+                Exp::Sym(s) => s,
+                Exp::Str(s) => s,
+                _ => return expected!("a symbol or string as field name"),
+            };
+            for (k, v) in fields {
+                if k == key {
+                    return Ok(v.clone());
+                }
+            }
+            could_not!("field '{}' not found in struct", key)
+        }
+        _ => expected!("a struct"),
+    }
+}
+
+/// Returns the name of a keyword as a string. Usage: (keyword/name :foo)
+pub fn lisp_keyword_name(args: &[Exp]) -> Result<Exp, Err> {
+    ensure_length_eq!(args, 1);
+    match &args[0] {
+        Exp::Keyword(kw) => Ok(Exp::Str(kw.clone())),
+        _ => expected!("a keyword"),
+    }
+}
+
+/// Returns information about an enum as a list: (name variant value).
+/// Usage: (enum/info my-enum)  -> ("my-enum" "my-variant" 42)
+pub fn lisp_enum_info(args: &[Exp]) -> Result<Exp, Err> {
+    ensure_length_eq!(args, 1);
+    match &args[0] {
+        Exp::Enum { name, variant, value } => {
+            let mut list = vec![
+                Exp::Str(name.clone()),
+                Exp::Str(variant.clone())
+            ];
+            if let Some(val) = value {
+                list.push(*val.clone());
+            }
+            Ok(Exp::List(list))
+        }
+        _ => expected!("an enum"),
+    }
+}
+
+/// Pushes an element onto the end of a vector and returns the updated vector.
+/// Usage: (vector/push (vector 1 2 3) 4)  -> [1 2 3 4]
+pub fn lisp_vector_push(args: &[Exp]) -> Result<Exp, Err> {
+    ensure_length_eq!(args, 2);
+    if let Exp::Vector(mut vec) = args[0].clone() {
+        vec.push(args[1].clone());
+        Ok(Exp::Vector(vec))
+    } else {
+        expected!("a vector")
+    }
+}
+
+/// Pops the last element off a vector and returns a tuple of the popped element and the updated vector.
+/// Usage: (vector/pop (vector 1 2 3))  -> (3 [1 2])
+pub fn lisp_vector_pop(args: &[Exp]) -> Result<Exp, Err> {
+    ensure_length_eq!(args, 1);
+    if let Exp::Vector(mut vec) = args[0].clone() {
+        let popped = vec.pop().unwrap_or(Exp::List(vec![]));
+        Ok(Exp::List(vec![popped, Exp::Vector(vec)]))
+    } else {
+        expected!("a vector")
+    }
+}
+
+/// Appends an element to the end of a list (preserving insertion order) and returns the updated list.
+/// Usage: (list/append (list 1 2) 3)  -> (1 2 3)
+pub fn lisp_list_append(args: &[Exp]) -> Result<Exp, Err> {
+    ensure_length_eq!(args, 2);
+    if let Exp::List(mut list) = args[0].clone() {
+        list.push(args[1].clone());
+        Ok(Exp::List(list))
+    } else {
+        expected!("a list")
+    }
+}
+
+/// Prepends an element to the beginning of a list and returns the updated list.
+/// Usage: (list/prepend (list 2 3) 1)  -> (1 2 3)
+pub fn lisp_list_prepend(args: &[Exp]) -> Result<Exp, Err> {
+    ensure_length_eq!(args, 2);
+    if let Exp::List(mut list) = args[0].clone() {
+        list.insert(0, args[1].clone());
+        Ok(Exp::List(list))
+    } else {
+        expected!("a list")
+    }
+}
+
+/// Returns the keys of a dictionary as a list of strings.
+/// Usage: (dict/keys { a 1 b 2 })  -> ("a" "b")
+pub fn lisp_dict_keys(args: &[Exp]) -> Result<Exp, Err> {
+    ensure_length_eq!(args, 1);
+    if let Exp::Dict(dict) = &args[0] {
+        let keys = dict
+            .keys()
+            .map(|k| {
+                let clean = k.trim_matches('"');
+                Exp::Str(clean.to_string())
+            })
+            .collect::<Vec<_>>();
+        Ok(Exp::List(keys))
+    } else {
+        expected!("a dict")
+    }
+}
+
+/// Returns the values of a dictionary as a list.
+/// Usage: (dict/values { a 1 b 2 })  -> (1 2)
+pub fn lisp_dict_values(args: &[Exp]) -> Result<Exp, Err> {
+    ensure_length_eq!(args, 1);
+    if let Exp::Dict(dict) = &args[0] {
+        let values = dict.values().cloned().collect::<Vec<_>>();
+        Ok(Exp::List(values))
+    } else {
+        expected!("a dict")
+    }
+}
+
+/// Evaluates a block literal by executing each expression and returns the result of each expression in a list.
+/// Usage: (block/eval { expr1 expr2 ... })
+pub fn lisp_block_eval(args: &[Exp]) -> Result<Exp, Err> {
+    ensure_length_eq!(args, 1);
+    if let Exp::Block(block) = &args[0] {
+        let mut env = default_env();
+        let mut results = Vec::new();
+        for exp in block {
+            results.push(crate::usr::lisp::eval::eval(exp, &mut env)?);
+        }
+        Ok(Exp::List(results))
+    } else {
+        expected!("a block")
+    }
+}
+
+/// Returns the number of expressions in a block.
+/// Usage: (block/length { expr1 expr2 ... })
+pub fn lisp_block_length(args: &[Exp]) -> Result<Exp, Err> {
+    ensure_length_eq!(args, 1);
+    if let Exp::Block(block) = &args[0] {
+        Ok(Exp::Num(Number::from(block.len())))
+    } else {
+        expected!("a block")
+    }
+}
+
+/// Converts a block into a list of its expressions.
+/// Usage: (block->list { expr1 expr2 ... })
+pub fn lisp_block_to_list(args: &[Exp]) -> Result<Exp, Err> {
+    ensure_length_eq!(args, 1);
+    if let Exp::Block(block) = &args[0] {
+        Ok(Exp::List(block.clone()))
+    } else {
+        expected!("a block")
+    }
+}
+
+/// Converts a block into a vector of its expressions.
+/// Usage: (block->vector { expr1 expr2 ... })
+pub fn lisp_block_to_vector(args: &[Exp]) -> Result<Exp, Err> {
+    ensure_length_eq!(args, 1);
+    if let Exp::Block(block) = &args[0] {
+        Ok(Exp::Vector(block.clone()))
+    } else {
+        expected!("a block")
+    }
+}
 
 pub fn lisp_eq(args: &[Exp]) -> Result<Exp, Err> {
     Ok(Exp::Bool(
@@ -294,6 +532,11 @@ pub fn lisp_type(args: &[Exp]) -> Result<Exp, Err> {
         Exp::Str(_) => "string",
         Exp::Sym(_) => "symbol",
         Exp::Num(_) => "number",
+        Exp::Enum { .. } => "enum",
+        Exp::Vector(_) => "vector",
+        Exp::Block(_) => "block",
+        Exp::Struct { .. } => "struct",
+        Exp::Keyword(_) => "keyword",
     };
     Ok(Exp::Str(exp.to_string()))
 }
@@ -607,7 +850,23 @@ pub fn lisp_get(args: &[Exp]) -> Result<Exp, Err> {
             if let Some(v) = l.get(i) {
                 Ok(v.clone())
             } else {
-                Ok(Exp::List(Vec::new()))
+                Ok(Exp::List(vec![]))
+            }
+        }
+        Exp::Vector(v) => {
+            let i = usize::try_from(number(&args[1])?)?;
+            if let Some(v) = v.get(i) {
+                Ok(v.clone())
+            } else {
+                Ok(Exp::List(vec![]))
+            }
+        }
+        Exp::Block(b) => {
+            let i = usize::try_from(number(&args[1])?)?;
+            if let Some(v) = b.get(i) {
+                Ok(v.clone())
+            } else {
+                Ok(Exp::List(vec![]))
             }
         }
         Exp::Str(s) => {
@@ -618,7 +877,15 @@ pub fn lisp_get(args: &[Exp]) -> Result<Exp, Err> {
                 Ok(Exp::Str("".to_string()))
             }
         }
-        _ => expected!("first argument to be a dict, a list, or a string"),
+        Exp::Struct { ref fields, .. } => {
+            let key = format!("{}", args[1]);
+            if let Some(v) = fields.get(&key) {
+                Ok(v.clone())
+            } else {
+                Ok(Exp::List(vec![]))
+            }
+        }
+        _ => expected!("first argument to be a dict, list, vector, block, string, or struct"),
     }
 }
 
@@ -636,18 +903,52 @@ pub fn lisp_put(args: &[Exp]) -> Result<Exp, Err> {
             let mut l = l.clone();
             let i = usize::try_from(number(&args[1])?)?;
             let v = args[2].clone();
-            l.insert(i, v);
-            Ok(Exp::List(l))
+            if i <= l.len() {
+                l.insert(i, v);
+                Ok(Exp::List(l))
+            } else {
+                expected!("index out of range")
+            }
+        }
+        Exp::Vector(v) => {
+            let mut v = v.clone();
+            let i = usize::try_from(number(&args[1])?)?;
+            let v_new = args[2].clone();
+            if i < v.len() {
+                v[i] = v_new;
+                Ok(Exp::Vector(v))
+            } else {
+                expected!("index out of range")
+            }
+        }
+        Exp::Block(b) => {
+            let mut b = b.clone();
+            let i = usize::try_from(number(&args[1])?)?;
+            let v_new = args[2].clone();
+            if i < b.len() {
+                b[i] = v_new;
+                Ok(Exp::Block(b))
+            } else {
+                expected!("index out of range")
+            }
         }
         Exp::Str(s) => {
             let mut s: Vec<char> = s.chars().collect();
             let i = usize::try_from(number(&args[1])?)?;
             let v: Vec<char> = string(&args[2])?.chars().collect();
             s.splice(i..i, v);
-            let s: String = s.into_iter().collect();
-            Ok(Exp::Str(s))
+            Ok(Exp::Str(s.into_iter().collect()))
         }
-        _ => expected!("first argument to be a dict, a list, or a string"),
+        Exp::Struct { ref name, ref fields } => {
+            let mut new_fields = fields.clone();
+            let key = format!("{}", args[1]);
+            new_fields.insert(key, args[2].clone());
+            Ok(Exp::Struct {
+                name: name.clone(),
+                fields: new_fields,
+            })
+        }
+        _ => expected!("first argument to be a dict, list, vector, block, string, or struct"),
     }
 }
 
