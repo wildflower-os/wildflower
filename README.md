@@ -1,4 +1,5 @@
 # WildflowerOS
+![loc](https://img.shields.io/endpoint?url=https://ghloc.vercel.app/api/wildflower-os/wildflower/badge?filter=.rs$&label=Lines%20of%20Code%20(Rust)&color=B66BFE)
 
 ![screenshot](doc/images/wildflower.png)
 
